@@ -1,20 +1,75 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Firemné financie – mesačné tabuľky</title>
-  <link href="style.css" rel="stylesheet" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Obálkový rozpočet</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Firemné financie – mesačné tabuľky</h1>
+<header class="top">
+  <h1>💸 Obálkový rozpočet</h1>
+  <div class="actions">
+    <button id="btnExport" class="secondary">⬇ Export</button>
+    <button id="btnImport" class="secondary">⬆ Import</button>
+    <input id="fileImport" type="file" accept="application/json" hidden>
+  </div>
+</header>
 
-  <div id="tabs"></div>
-  <div id="main-app"></div>
+<nav class="tabs">
+  <button data-tab="envelopes" class="active">Obálky</button>
+  <button data-tab="transactions">Transakcie</button>
+  <button data-tab="reports">Prehľady</button>
+  <button data-tab="settings">Nastavenia</button>
+</nav>
 
-  <!-- 🔹 Fixné náklady blok -->
-  <section id="fixne-naklady-block" class="card"></section>
+<main>
+  <!-- SUMMARY -->
+  <section class="card summary" id="summary"></section>
 
-  <script src="app.js"></script>
+  <!-- ENVELOPES -->
+  <section class="tab card" id="tab-envelopes">
+    <div class="row">
+      <button id="addEnvelope">+ Pridať obálku</button>
+      <button id="resetMonth" class="secondary">Nový mesiac (neprenášať zostatky)</button>
+      <button id="rolloverMonth" class="secondary">Nový mesiac (preniesť zostatky)</button>
+    </div>
+    <div id="envelopesList" class="envelopes"></div>
+  </section>
+
+  <!-- TRANSACTIONS -->
+  <section class="tab card hidden" id="tab-transactions">
+    <form id="txForm" class="txform">
+      <input type="date" id="txDate" required>
+      <select id="txEnvelope" required></select>
+      <input type="number" id="txAmount" step="0.01" placeholder="Suma (€)" required>
+      <input type="text" id="txNote" placeholder="Poznámka">
+      <select id="txType">
+        <option value="expense">Výdavok</option>
+        <option value="income">Príjem</option>
+      </select>
+      <button type="submit">Pridať</button>
+    </form>
+    <div id="txList" class="txlist"></div>
+  </section>
+
+  <!-- REPORTS -->
+  <section class="tab card hidden" id="tab-reports">
+    <div id="reportMonth"></div>
+    <canvas id="chart" width="600" height="320"></canvas>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="tab card hidden" id="tab-settings">
+    <label>Začiatočný mesiac:
+      <input type="month" id="startMonth">
+    </label>
+    <button id="clearAll" class="danger">Vymazať všetky dáta</button>
+    <p class="muted">Dáta sa ukladajú lokálne do prehliadača. Exportom si vytvoríš zálohu (JSON) a vieš ju opäť importovať.</p>
+  </section>
+</main>
+
+<button id="fab">＋</button>
+<script src="app.js"></script>
 </body>
-</html>
+  </html>
