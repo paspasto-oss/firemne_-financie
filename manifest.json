@@ -1,7 +1,7 @@
 {
-  "name": "Obálkový rozpočet",
-  "short_name": "Rozpočet",
-  "description": "Jednoduchý envelope budget offline.",
+  "name": "Firemné financie",
+  "short_name": "Financie",
+  "description": "Mesačné financie s fixnými výdavkami. PWA & offline.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
