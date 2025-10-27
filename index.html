@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Firemné financie – výstup na plátno (A4)</title>
+<style>
+  :root{ --red:#c40000; }
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f6f7f9;color:#111}
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid #e6e6e6;padding:12px 16px;z-index:5}
+  h1{margin:0;color:var(--red);font-size:20px}
+  main{max-width:1000px;margin:24px auto;padding:0 16px}
+  .card{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:14px;margin-bottom:18px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+  label{font-weight:600}
+  select,input,button{padding:10px 12px;border:1px solid #d8dbe2;border-radius:8px}
+  button{background:var(--red);color:#fff;border:none;font-weight:700;cursor:pointer}
+  button.secondary{background:#eceef3;color:#222}
+  .hint{font-size:12px;color:#555}
+  .canvasWrap{overflow:auto;background:#fff;padding:10px;border-radius:12px;border:1px solid #eee}
+  canvas{max-width:100%;height:auto;display:block;margin:auto}
+</style>
+<!-- PDF export (voliteľné) -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+<header><h1>Firemné financie – výstup na plátno (A4)</h1></header>
+
+<main>
+  <section class="card">
+    <div class="row">
+      <div>
+        <label>Mesiac</label><br>
+        <select id="mes"></select>
+      </div>
+      <div>
+        <label>Fixné náklady (€)</label><br>
+        <input id="fix" type="number" value="8300" />
+      </div>
+      <div>
+        <label>Cieľ zisku (€)</label><br>
+        <input id="ciel" type="number" value="3000" />
+      </div>
+      <div>
+        <button id="btnRender">Vykresliť na plátno</button>
+      </div>
+      <div>
+        <button id="btnPNG" class="secondary">⬇ Stiahnuť PNG</button>
+      </div>
+      <div>
+        <button id="btnPDF" class="secondary">⬇ Stiahnuť PDF</button>
+      </div>
+    </div>
+    <p class="hint">Dáta sa čítajú z localStorage kľúča <code>finTabsV3</code> (z tvojej apky). V tabuľke sa zoberie vybraný mesiac.</p>
+  </section>
+
+  <section class="canvasWrap">
+    <!-- A4 @ 96 DPI ~ 794×1123 px -->
+    <canvas id="sheet" width="794" height="1123"></canvas>
+  </section>
+</main>
+
+<script>
+const months = ['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'];
+const mesSel = document.getElementById('mes');
+months.forEach((m,i)=>{
+  const o=document.createElement('option'); o.value=i; o.textContent=m; mesSel.appendChild(o);
+});
+mesSel.value = String(new Date().getMonth());
+
+const fmt = n => (Number(n)||0).toLocaleString('sk-SK',{minimumFractionDigits:2, maximumFractionDigits:2});
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem('finTabsV3');
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+
+// Drawing helpers
+function drawRoundedRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y,   x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x,   y+h, r);
+  ctx.arcTo(x,   y+h, x,   y,   r);
+  ctx.arcTo(x,   y,   x+w, y,   r);
+  ctx.closePath();
+}
+function text(ctx, s, x, y, opt={}) {
+  const {align='left', baseline='alphabetic', color='#111', font=null} = opt;
+  if(font) ctx.font = font;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = baseline;
+  ctx.fillText(String(s), x, y);
+}
+
+function render(){
+  const state = loadState();
+  const fix = Number(document.getElementById('fix').value)||0;
+  const ciel = Number(document.getElementById('ciel').value)||0;
+  const mIdx = Number(mesSel.value)||0;
+
+  const cvs = document.getElementById('sheet');
+  const ctx = cvs.getContext('2d');
+
+  // Clear
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,cvs.width,cvs.height);
+
+  // Margins
+  const M = 26;
+  let y = M;
+
+  // Header
+  text(ctx, 'SPEKTRA INSTALL s.r.o.', M, y+6, {font:'bold 16px Arial', baseline:'top', color:'#c40000'});
+  text(ctx, 'Firemné financie – prehľad mesiaca', cvs.width-M, y+6, {font:'bold 16px Arial', baseline:'top', color:'#111', align:'right'});
+  y += 34;
+
+  // Month + meta bar
+  const monthName = months[mIdx];
+  drawRoundedRect(ctx, M, y, cvs.width-2*M, 40, 8);
+  ctx.fillStyle = '#f4f4f6';
+  ctx.fill();
+  text(ctx, monthName + ' ' + new Date().getFullYear(), M+14, y+20, {font:'bold 16px Arial', baseline:'middle', color:'#111'});
+  const now = new Date().toLocaleString('sk-SK');
+  text(ctx, 'Vygenerované: ' + now, cvs.width-M-14, y+20, {font:'12px Arial', baseline:'middle', color:'#555', align:'right'});
+  y += 56;
+
+  // Table headers
+  const cols = [
+    {name:'Dátum', w:100},
+    {name:'Zákazník / Projekt', w:210},
+    {name:'Príjem (€)', w:120, align:'right'},
+    {name:'Výdavky (€)', w:120, align:'right'},
+    {name:'Zisk (€)', w:120, align:'right'},
+    {name:'Poznámka', w: (cvs.width-2*M) - (100+210+120+120+120)}
+  ];
+  const tableX = M, tableW = cvs.width-2*M;
+
+  // Header row
+  ctx.fillStyle = '#c40000';
+  ctx.fillRect(tableX, y, tableW, 28);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 12px Arial';
+  let x = tableX;
+  cols.forEach(c=>{
+    text(ctx, c.name, x+8, y+14, {baseline:'middle', color:'#fff'});
+    x += c.w;
+  });
+  y += 28;
+
+  // Body rows
+  const rows = (state?.months?.[mIdx]?.rows || []).slice(); // array of {date,customer,income,expense,profit,note}
+  ctx.font = '12px Arial';
+  ctx.fillStyle = '#111';
+  let sumInc=0, sumExp=0, sumProf=0;
+
+  const rowH = 24;
+  rows.forEach((r,i)=>{
+    const even = i % 2 === 0;
+    // stripe
+    ctx.fillStyle = even ? '#fafbfc' : '#fff';
+    ctx.fillRect(tableX, y, tableW, rowH);
+
+    // Values
+    const vals = [
+      (r.date ? new Date(r.date).toLocaleDateString('sk-SK') : ''),
+      r.customer||'',
+      fmt(r.income||0),
+      fmt(r.expense||0),
+      fmt((r.income||0)-(r.expense||0)),
+      r.note||''
+    ];
+    sumInc += Number(r.income)||0;
+    sumExp += Number(r.expense)||0;
+    sumProf += (Number(r.income)||0) - (Number(r.expense)||0);
+
+    // text
+    let cx = tableX;
+    ctx.fillStyle = '#111';
+    for (let c=0;c<cols.length;c++){
+      const cdef = cols[c];
+      const cell = vals[c];
+      let tx = cx + (cdef.align==='right' ? cdef.w-8 : 8);
+      let align = cdef.align || 'left';
+      if(c===4){ // profit color
+        ctx.fillStyle = ((Number(r.income)||0)-(Number(r.expense)||0)) >=0 ? '#0a7a1f' : '#b00020';
+      } else {
+        ctx.fillStyle = '#111';
+      }
+      text(ctx, cell, tx, y+rowH/2, {align, baseline:'middle'});
+      cx += cdef.w;
+    }
+    y += rowH;
+  });
+
+  // Sums row
+  ctx.fillStyle = '#111';
+  ctx.fillRect(tableX, y, tableW, 28);
+  ctx.fillStyle = '#fff';
+  text(ctx, 'SPOLU', tableX+8, y+14, {baseline:'middle', font:'bold 12px Arial'});
+  let sx = tableX + cols[0].w + cols[1].w;
+  text(ctx, fmt(sumInc), sx+cols[2].w-8, y+14, {align:'right', baseline:'middle', font:'bold 12px Arial'}); sx += cols[2].w;
+  text(ctx, fmt(sumExp), sx+cols[3].w-8, y+14, {align:'right', baseline:'middle', font:'bold 12px Arial'}); sx += cols[3].w;
+  const sumColor = (sumInc-sumExp)>=0 ? '#bff0c8' : '#ffd7d7';
+  ctx.fillStyle = sumColor; ctx.fillRect(sx, y, cols[4].w, 28);
+  text(ctx, fmt(sumInc-sumExp), sx+cols[4].w-8, y+14, {align:'right', baseline:'middle', font:'bold 12px Arial', color:'#111'});
+  y += 40;
+
+  // Fixed costs + goal bar
+  const fixRowH = 70;
+  drawRoundedRect(ctx, M, y, tableW, fixRowH, 10);
+  ctx.fillStyle = '#f7f7fa'; ctx.fill();
+  const needCosts = Math.max(0, fix - (sumInc-sumExp));
+  const needGoal  = Math.max(0, fix + ciel - (sumInc-sumExp));
+  text(ctx, `Fixné náklady: ${fmt(fix)} €`, M+14, y+22, {font:'bold 14px Arial', baseline:'middle'});
+  text(ctx, `Cieľ zisku: ${fmt(ciel)} €`, M+14, y+48, {font:'bold 14px Arial', baseline:'middle'});
+  text(ctx, `Chýba do nákladov: ${fmt(needCosts)} €`, cvs.width-M-14, y+22, {align:'right', baseline:'middle', font:'bold 14px Arial', color:'#b00020'});
+  text(ctx, `Chýba spolu (náklady + cieľ): ${fmt(needGoal)} €`, cvs.width-M-14, y+48, {align:'right', baseline:'middle', font:'bold 14px Arial', color:'#b00020'});
+}
+
+document.getElementById('btnRender').addEventListener('click', render);
+
+// Save PNG
+document.getElementById('btnPNG').addEventListener('click', ()=>{
+  const cvs = document.getElementById('sheet');
+  const url = cvs.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  const name = `financie_${months[Number(mesSel.value)]}.png`;
+  a.download = name;
+  a.click();
+});
+
+// Save PDF (voliteľné)
+document.getElementById('btnPDF').addEventListener('click', async ()=>{
+  const { jsPDF } = window.jspdf || {};
+  if(!jsPDF){ alert('jsPDF sa nenačítal'); return; }
+  const pdf = new jsPDF({orientation:'portrait', unit:'px', format:'a4'});
+  const cvs = document.getElementById('sheet');
+  // zväčšiť rozlíšenie pre ostrosť
+  const tmp = document.createElement('canvas');
+  tmp.width = 794*2; tmp.height = 1123*2;
+  const tctx = tmp.getContext('2d');
+  tctx.scale(2,2);
+  // prekresliť
+  // malý trik: dočasne zmeníme rozmery originálu na 2x, ale jednoduchšie: len zavoláme render na dočasné plátno
+  // pre jednoduchosť sem len skopírujeme obsah originálu
+  tctx.drawImage(cvs, 0, 0);
+  const img = tmp.toDataURL('image/png');
+  pdf.addImage(img, 'PNG', 0, 0, 595, 842); // A4 v px (jsPDF default 96dpi ~ 595×842)
+  pdf.save(`financie_${months[Number(mesSel.value)]}.pdf`);
+});
+
+// Auto vykreslenie pri štarte
+render();
+</script>
+</body>
+</html>
