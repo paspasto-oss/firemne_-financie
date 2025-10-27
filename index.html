@@ -2,13 +2,20 @@
 <html lang="sk">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Obálkový rozpočet</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Firemné financie – PWA</title>
+
+  <!-- PWA -->
+  <meta name="theme-color" content="#c40000">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="top">
-  <h1>💸 Obálkový rozpočet</h1>
+  <h1>📊 Firemné financie</h1>
   <div class="actions">
     <button id="btnExport" class="secondary">⬇ Export</button>
     <button id="btnImport" class="secondary">⬆ Import</button>
@@ -16,60 +23,94 @@
   </div>
 </header>
 
-<nav class="tabs">
-  <button data-tab="envelopes" class="active">Obálky</button>
-  <button data-tab="transactions">Transakcie</button>
-  <button data-tab="reports">Prehľady</button>
-  <button data-tab="settings">Nastavenia</button>
+<nav class="bar">
+  <button id="prevM">◀</button>
+  <label>Mesiac</label>
+  <input type="month" id="monthPick">
+  <button id="nextM">▶</button>
+  <span class="spacer"></span>
+  <button id="btnPrint" class="secondary">🖨️ Tlačiť</button>
 </nav>
 
 <main>
-  <!-- SUMMARY -->
-  <section class="card summary" id="summary"></section>
-
-  <!-- ENVELOPES -->
-  <section class="tab card" id="tab-envelopes">
-    <div class="row">
-      <button id="addEnvelope">+ Pridať obálku</button>
-      <button id="resetMonth" class="secondary">Nový mesiac (neprenášať zostatky)</button>
-      <button id="rolloverMonth" class="secondary">Nový mesiac (preniesť zostatky)</button>
+  <!-- Fixné výdavky (jedna sada pre všetky mesiace) -->
+  <section class="card" id="fixBlock">
+    <header class="cardHead">
+      <h2>Fixné výdavky (prenesú sa do každého mesiaca)</h2>
+      <div class="right">
+        <button id="addFix" class="secondary">+ Pridať položku</button>
+        <button id="pushFix" title="Vložiť fixné do aktuálneho mesiaca">→ Vložiť do mesiaca</button>
+      </div>
+    </header>
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40%">Popis</th>
+            <th style="width:18%">Suma (€)</th>
+            <th>Poznámka</th>
+            <th style="width:90px">Akcie</th>
+          </tr>
+        </thead>
+        <tbody id="fixBody"></tbody>
+        <tfoot>
+          <tr>
+            <th>SPOLU</th>
+            <th id="fixSum">0,00</th>
+            <th colspan="2"></th>
+          </tr>
+        </tfoot>
+      </table>
     </div>
-    <div id="envelopesList" class="envelopes"></div>
   </section>
 
-  <!-- TRANSACTIONS -->
-  <section class="tab card hidden" id="tab-transactions">
-    <form id="txForm" class="txform">
-      <input type="date" id="txDate" required>
-      <select id="txEnvelope" required></select>
-      <input type="number" id="txAmount" step="0.01" placeholder="Suma (€)" required>
-      <input type="text" id="txNote" placeholder="Poznámka">
-      <select id="txType">
-        <option value="expense">Výdavok</option>
-        <option value="income">Príjem</option>
-      </select>
-      <button type="submit">Pridať</button>
-    </form>
-    <div id="txList" class="txlist"></div>
-  </section>
+  <!-- Mesačná tabuľka -->
+  <section class="card">
+    <header class="cardHead">
+      <h2 id="sheetTitle">Tabuľka</h2>
+      <div class="right">
+        <button id="addRow">+ Pridať riadok</button>
+        <button id="clearMonth" class="secondary">Vyčistiť mesiac</button>
+        <span class="muted" id="infoAutoFix"></span>
+      </div>
+    </header>
 
-  <!-- REPORTS -->
-  <section class="tab card hidden" id="tab-reports">
-    <div id="reportMonth"></div>
-    <canvas id="chart" width="600" height="320"></canvas>
-  </section>
-
-  <!-- SETTINGS -->
-  <section class="tab card hidden" id="tab-settings">
-    <label>Začiatočný mesiac:
-      <input type="month" id="startMonth">
-    </label>
-    <button id="clearAll" class="danger">Vymazať všetky dáta</button>
-    <p class="muted">Dáta sa ukladajú lokálne do prehliadača. Exportom si vytvoríš zálohu (JSON) a vieš ju opäť importovať.</p>
+    <div class="tableWrap">
+      <table id="sheet">
+        <thead>
+          <tr>
+            <th style="width:120px">Dátum</th>
+            <th>Popis</th>
+            <th style="width:140px">Príjem (€)</th>
+            <th style="width:140px">Výdavok (€)</th>
+            <th style="width:140px">Zisk (€)</th>
+            <th>Poznámka</th>
+            <th style="width:90px">Akcie</th>
+          </tr>
+        </thead>
+        <tbody id="sheetBody"></tbody>
+        <tfoot>
+          <tr>
+            <th>SPOLU</th>
+            <th></th>
+            <th id="sumInc">0,00</th>
+            <th id="sumExp">0,00</th>
+            <th id="sumProf">0,00</th>
+            <th colspan="2"></th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </section>
 </main>
 
-<button id="fab">＋</button>
+<button id="fab" title="Pridať riadok">＋</button>
+
 <script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js').catch(console.warn));
+  }
+</script>
 </body>
-  </html>
+</html>
