@@ -1,14 +1,13 @@
-// sw.js
-const CACHE = 'financie-v3';            // ↑↑↑ zvýš číslo
+// PWA Service Worker – zvýšená verzia cache + app.js v assets
+const CACHE = 'financie-v4';
 const ASSETS = [
   './',
   './index.html',
-  './app.js',                           // ← pridaj
+  './app.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
-/* zvyšok nechaj ako máš */
 
 self.addEventListener('install', e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
@@ -24,7 +23,7 @@ self.addEventListener('fetch', e=>{
   const req = e.request;
   e.respondWith(
     caches.match(req).then(res=> res || fetch(req).then(net=>{
-      // Cacheujeme iba same-origin; CDN pre XLSX pôjde z webu, čo je OK.
+      // cache only same-origin
       if(req.method==='GET' && req.url.startsWith(self.location.origin)){
         const copy = net.clone();
         caches.open(CACHE).then(c=>c.put(req, copy));
