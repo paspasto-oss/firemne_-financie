@@ -96,31 +96,34 @@
     </section>
 
     <section class="card">
-      <h2>Prehľad financií za mesiac: <span id="monthName"></span></h2>
-      <table id="tbl">
-        <thead>
-          <tr>
-            <th style="width:32%">Zákazník / Projekt</th>
-            <th class="right" style="width:14%">Príjem (€)</th>
-            <th class="right" style="width:14%">Výdavok (€)</th>
-            <th style="width:28%">Poznámka</th>
-            <th style="width:12%">Akcie</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-        <tfoot>
-          <tr>
-            <th>Spolu</th>
-            <th class="right" id="sumIn">0</th>
-            <th class="right" id="sumOut">0</th>
-            <th colspan="2" class="right">
-              <span class="pill"><span class="muted">Zisk</span> <b id="sumProfit">0</b> €</span>
-            </th>
-          </tr>
-        </tfoot>
-      </table>
-    </section>
+  <h2>Prehľad financií za mesiac: <span id="monthName"></span></h2>
+
+  <!-- NOVÉ: vodorovný scroll kontajner -->
+  <div class="table-wrap">
+    <table id="tbl" class="wide-table">
+      <thead>
+        <tr>
+          <th class="sticky first-col" style="width:34%">Zákazník / Projekt</th>
+          <th class="right" style="width:16%">Príjem (€)</th>
+          <th class="right" style="width:16%">Výdavok (€)</th>
+          <th style="width:26%">Poznámka</th>
+          <th style="width:8%">Akcie</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+      <tfoot>
+        <tr>
+          <th class="sticky first-col">Spolu</th>
+          <th class="right" id="sumIn">0</th>
+          <th class="right" id="sumOut">0</th>
+          <th colspan="2" class="right">
+            <span class="pill"><span class="muted">Zisk</span> <b id="sumProfit">0</b> €</span>
+          </th>
+        </tr>
+      </tfoot>
+    </table>
   </div>
+    </section>
 
   <script>
     // ======= Pomôcky
