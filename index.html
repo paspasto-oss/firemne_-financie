@@ -14,75 +14,82 @@
   <script defer src="app.js"></script>
 
   <style>
-    :root{
-      --red:#b91c1c; --bg:#fafafa; --card:#fff; --muted:#6b7280;
-      --ring:0 0 0 3px rgba(185,28,28,.25);
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
-         background:var(--bg); color:#111;}
-    header{display:flex;align-items:center;gap:.6rem;padding:1rem 1rem 0}
-    header .logo{width:36px;height:36px;border-radius:9px;background:var(--red);
-      display:grid;place-items:center;color:#fff;font-weight:700}
-    h1{margin:.2rem 0 1rem;font-size:1.6rem;color:var(--red);line-height:1.1}
-    .wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
-    .months{display:flex;flex-wrap:wrap;gap:.6rem;margin:0 0 1rem}
-    .m-btn{padding:.5rem .9rem;border-radius:.6rem;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
-    .m-btn.active{background:var(--red);border-color:var(--red);color:#fff}
-    .card{background:var(--card);border:1px solid #eee;border-radius:12px;padding:1rem;margin:1rem 0;box-shadow:0 1px 0 rgba(0,0,0,.03)}
-    .row{display:flex;flex-wrap:wrap;gap:.6rem}
-    .row > *{flex:1 1 180px}
-    label{font-size:.85rem;color:var(--muted)}
-    input[type="text"], input[type="number"]{
-      width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;
-      font-size:16px; /* no-zoom na mobile */
-      min-height:44px; /* tap target */
-    }
-    input:focus{outline:none;box-shadow:var(--ring);border-color:var(--red)}
-    .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;
-      padding:.6rem .9rem;cursor:pointer}
-    .btn.red{background:var(--red);color:#fff;border-color:var(--red)}
-    .btn.ghost{background:#fff}
-    .btn:active{transform:translateY(1px)}
-    .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 .2rem}
-    .summary{margin-top:.7rem;font-weight:600}
-    .summary small{font-weight:400;color:var(--muted)}
+  :root{
+    --red:#b91c1c; --bg:#fafafa; --card:#fff; --muted:#6b7280;
+    --ring:0 0 0 3px rgba(185,28,28,.25);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+       background:var(--bg); color:#111;}
+  header{display:flex;align-items:center;gap:.6rem;padding:1rem 1rem 0}
+  header .logo{width:36px;height:36px;border-radius:9px;background:var(--red);
+    display:grid;place-items:center;color:#fff;font-weight:700}
+  h1{margin:.2rem 0 1rem;font-size:1.6rem;color:var(--red);line-height:1.1}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
+  .months{display:flex;flex-wrap:wrap;gap:.6rem;margin:0 0 1rem}
+  .m-btn{padding:.5rem .9rem;border-radius:.6rem;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+  .m-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+  .card{background:var(--card);border:1px solid #eee;border-radius:12px;padding:1rem;margin:1rem 0;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+  .row{display:flex;flex-wrap:wrap;gap:.6rem}
+  .row > *{flex:1 1 180px}
+  label{font-size:.85rem;color:var(--muted)}
+  input[type="text"], input[type="number"]{
+    width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;
+    font-size:16px;min-height:44px;
+  }
+  input:focus{outline:none;box-shadow:var(--ring);border-color:var(--red)}
+  .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;
+    padding:.6rem .9rem;cursor:pointer}
+  .btn.red{background:var(--red);color:#fff;border-color:var(--red)}
+  .btn:active{transform:translateY(1px)}
+  .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 .2rem}
+  .summary{margin-top:.7rem;font-weight:600}
+  .summary small{font-weight:400;color:var(--muted)}
 
-    /* TABUĽKA – širšia, s vodorovným posúvaním a sticky prvým stĺpcom */
-    .table-wrap{
-      overflow-x:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
-      border-radius:10px;
-    }
-    table{width:100%;border-collapse:collapse;margin-top:.6rem}
-    table.wide-table{ min-width: 1000px; } /* nastav podľa chuti (920–1200px) */
-    th,td{border-top:1px solid #eee;padding:.8rem .6rem;text-align:left;background:#fff}
-    th{font-size:.9rem;color:#374151;background:#fafafa}
-    .right{text-align:right}
-    .muted{color:var(--muted)}
-    .pill{display:inline-block;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:999px;padding:.15rem .55rem;font-size:.78rem}
-    .danger{color:#b91c1c}
-    .ok{color:#059669}
-    .flex{display:flex;align-items:center;gap:.6rem}
-    .mt{margin-top:.6rem}
-    .hidden{display:none}
+  /* ======= TABUĽKA ======= */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    border-radius:10px;
+    width:100%;
+  }
+  table{
+    border-collapse:collapse;
+    width:100%;
+    margin-top:.6rem;
+  }
+  table.wide-table{min-width:950px;} /* <-- garantuje scroll */
+  th,td{border-top:1px solid #eee;padding:.9rem .7rem;text-align:left;background:#fff;vertical-align:middle}
+  th{font-size:.9rem;color:#374151;background:#fafafa}
+  .right{text-align:right}
+  .muted{color:#6b7280}
+  .pill{display:inline-block;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:999px;padding:.15rem .55rem;font-size:.78rem}
+  .danger{color:#b91c1c}
+  .ok{color:#059669}
 
-    /* Sticky prvý stĺpec (názov) */
-    .first-col{ min-width:240px; }
-    .sticky{ position:sticky; left:0; z-index:2; background:#fff; border-right:1px solid #f1f1f1; box-shadow:1px 0 0 rgba(0,0,0,.05); }
-    thead .sticky, tfoot .sticky{ z-index:3; }
+  /* Sticky first column */
+  .first-col{min-width:240px;}
+  .sticky{
+    position:sticky;left:0;z-index:2;background:#fff;
+    border-right:1px solid #f1f1f1;box-shadow:1px 0 0 rgba(0,0,0,.06);
+  }
+  thead .sticky, tfoot .sticky{z-index:3;}
+  .table-wrap::-webkit-scrollbar{height:8px;}
+  .table-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px;}
 
-    @media (max-width:420px){
-      .first-col{ min-width:260px; }
-      .pill{ font-size:.72rem; }
-    }
+  @media (max-width:480px){
+    table.wide-table{min-width:1000px;} /* viac priestoru pre názvy */
+    th,td{padding:1rem .6rem;}
+    .first-col{min-width:260px;}
+  }
 
-    @media print{
-      .months, .toolbar, header{display:none}
-      .card{box-shadow:none;border:none;padding:0}
-      body{background:#fff}
-      table.wide-table{ min-width:auto; }
-      .sticky{ position:static; box-shadow:none; }
-    }
+  @media print{
+    .months,.toolbar,header{display:none}
+    body{background:#fff}
+    .card{border:none;box-shadow:none;padding:0}
+    .sticky{position:static;box-shadow:none}
+  }
   </style>
 </head>
 <body>
