@@ -7,8 +7,12 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#b91c1c"/>
   <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+
+  <!-- XLSX (SheetJS) na export do Excelu -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
+  <!-- Aplikácia -->
   <script defer src="app.js"></script>
+
   <style>
     :root{ --red:#b91c1c; --bg:#fafafa; --card:#fff; --muted:#6b7280; --ring:0 0 0 3px rgba(185,28,28,.25); }
     *{box-sizing:border-box}
@@ -30,8 +34,25 @@
     .btn.red{background:var(--red);color:#fff;border-color:var(--red)}
     .btn:active{transform:translateY(1px)}
     .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 .2rem}
-    .summary{margin-top:.7rem;font-weight:600}
-    .summary small{font-weight:400;color:var(--muted)}
+
+    /* --- pekné štatistické karty --- */
+    .stats{
+      display:grid; grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:.7rem; margin-top:.8rem;
+    }
+    .stat{
+      background:#fff; border:1px solid #eee; border-radius:12px;
+      padding:.8rem 1rem; display:flex; align-items:center; justify-content:space-between;
+    }
+    .stat-label{ color:var(--muted); font-size:.92rem; }
+    .stat-right{ display:flex; align-items:baseline; gap:.5rem; }
+    .stat-value{ font-weight:700; font-size:1.15rem; }
+    .stat-sub{ color:var(--muted); font-size:.85rem; }
+    .stat.ok .stat-value{ color:#059669; }
+    .stat.warn .stat-value{ color:#b45309; }
+    .stat.danger .stat-value{ color:#b91c1c; }
+    @media (max-width: 720px){ .stats{ grid-template-columns: 1fr; } }
+
     /* tabuľka so scrollom */
     .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border-radius:10px;width:100%}
     table{border-collapse:collapse;width:100%;margin-top:.6rem}
@@ -42,6 +63,7 @@
     .muted{color:#6b7280}
     .pill{display:inline-block;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:999px;padding:.15rem .55rem;font-size:.78rem}
     .danger{color:#b91c1c}.ok{color:#059669}
+
     @media (max-width:480px){
       table.wide-table{min-width:1200px}
       th,td{padding:1rem .6rem}
@@ -73,13 +95,12 @@
         <button id="exportXlsx" class="btn">⬇️ Export Excel</button>
         <button id="clearBtn" class="btn">🧹 Vyčistiť mesiac</button>
         <button id="exportBtn" class="btn">↓ Export JSON</button>
-        <label class="btn">
-          ↑ Import JSON
+        <label class="btn">↑ Import JSON
           <input id="importFile" type="file" accept="application/json" class="hidden" style="display:none">
         </label>
       </div>
 
-      <div class="row mt">
+      <div class="row">
         <div><label>Fixné náklady €</label><input id="fixne" type="number" inputmode="numeric" min="0" step="1" value="0"></div>
         <div><label>Cieľ zisku €</label><input id="target" type="number" inputmode="numeric" min="0" step="1" value="0"></div>
         <div>
@@ -90,28 +111,28 @@
           </div>
         </div>
       </div>
+
+      <!-- ŠTATISTICKÉ KARTY -->
       <div class="stats">
-  <div class="stat" id="cardFix">
-    <div class="stat-label">Fixné</div>
-    <div class="stat-right">
-      <div class="stat-value" id="sFix">0 €</div>
-    </div>
-  </div>
-
-  <div class="stat" id="cardMissC">
-    <div class="stat-label">Chýba do nákladov</div>
-    <div class="stat-right">
-      <div class="stat-value" id="sMissCosts">0 €</div>
-    </div>
-  </div>
-
-  <div class="stat" id="cardMissAll">
-    <div class="stat-label">Chýba spolu (náklady + cieľ)</div>
-    <div class="stat-right">
-      <div class="stat-value" id="sMissAll">0 €</div>
-      <div class="stat-sub" id="sTarget">(cieľ 0 €)</div>
-    </div>
-  </div>
+        <div class="stat" id="cardFix">
+          <div class="stat-label">Fixné</div>
+          <div class="stat-right">
+            <div class="stat-value" id="sFix">0 €</div>
+          </div>
+        </div>
+        <div class="stat" id="cardMissC">
+          <div class="stat-label">Chýba do nákladov</div>
+          <div class="stat-right">
+            <div class="stat-value" id="sMissCosts">0 €</div>
+          </div>
+        </div>
+        <div class="stat" id="cardMissAll">
+          <div class="stat-label">Chýba spolu (náklady + cieľ)</div>
+          <div class="stat-right">
+            <div class="stat-value" id="sMissAll">0 €</div>
+            <div class="stat-sub" id="sTarget">(cieľ 0 €)</div>
+          </div>
+        </div>
       </div>
     </section>
 
