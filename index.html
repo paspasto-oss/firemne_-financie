@@ -7,89 +7,50 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#b91c1c"/>
   <link rel="icon" href="icons/icon-192.png" sizes="192x192">
-
-  <!-- XLSX (SheetJS) na export do Excelu -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
-  <!-- Aplikácia -->
   <script defer src="app.js"></script>
-
   <style>
-  :root{
-    --red:#b91c1c; --bg:#fafafa; --card:#fff; --muted:#6b7280;
-    --ring:0 0 0 3px rgba(185,28,28,.25);
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
-       background:var(--bg); color:#111;}
-  header{display:flex;align-items:center;gap:.6rem;padding:1rem 1rem 0}
-  header .logo{width:36px;height:36px;border-radius:9px;background:var(--red);
-    display:grid;place-items:center;color:#fff;font-weight:700}
-  h1{margin:.2rem 0 1rem;font-size:1.6rem;color:var(--red);line-height:1.1}
-  .wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
-  .months{display:flex;flex-wrap:wrap;gap:.6rem;margin:0 0 1rem}
-  .m-btn{padding:.5rem .9rem;border-radius:.6rem;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
-  .m-btn.active{background:var(--red);border-color:var(--red);color:#fff}
-  .card{background:var(--card);border:1px solid #eee;border-radius:12px;padding:1rem;margin:1rem 0;box-shadow:0 1px 0 rgba(0,0,0,.03)}
-  .row{display:flex;flex-wrap:wrap;gap:.6rem}
-  .row > *{flex:1 1 180px}
-  label{font-size:.85rem;color:var(--muted)}
-  input[type="text"], input[type="number"]{
-    width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;
-    font-size:16px;min-height:44px;
-  }
-  input:focus{outline:none;box-shadow:var(--ring);border-color:var(--red)}
-  .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;
-    padding:.6rem .9rem;cursor:pointer}
-  .btn.red{background:var(--red);color:#fff;border-color:var(--red)}
-  .btn:active{transform:translateY(1px)}
-  .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 .2rem}
-  .summary{margin-top:.7rem;font-weight:600}
-  .summary small{font-weight:400;color:var(--muted)}
-
-  /* ======= TABUĽKA ======= */
-  .table-wrap{
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior-x:contain;
-    border-radius:10px;
-    width:100%;
-  }
-  table{
-    border-collapse:collapse;
-    width:100%;
-    margin-top:.6rem;
-  }
-  table.wide-table{min-width:950px;} /* <-- garantuje scroll */
-  th,td{border-top:1px solid #eee;padding:.9rem .7rem;text-align:left;background:#fff;vertical-align:middle}
-  th{font-size:.9rem;color:#374151;background:#fafafa}
-  .right{text-align:right}
-  .muted{color:#6b7280}
-  .pill{display:inline-block;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:999px;padding:.15rem .55rem;font-size:.78rem}
-  .danger{color:#b91c1c}
-  .ok{color:#059669}
-
-  /* Sticky first column */
-  .first-col{min-width:240px;}
-  .sticky{
-    position:sticky;left:0;z-index:2;background:#fff;
-    border-right:1px solid #f1f1f1;box-shadow:1px 0 0 rgba(0,0,0,.06);
-  }
-  thead .sticky, tfoot .sticky{z-index:3;}
-  .table-wrap::-webkit-scrollbar{height:8px;}
-  .table-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px;}
-
-  @media (max-width:480px){
-    table.wide-table{min-width:1000px;} /* viac priestoru pre názvy */
-    th,td{padding:1rem .6rem;}
-    .first-col{min-width:260px;}
-  }
-
-  @media print{
-    .months,.toolbar,header{display:none}
-    body{background:#fff}
-    .card{border:none;box-shadow:none;padding:0}
-    .sticky{position:static;box-shadow:none}
-  }
+    :root{ --red:#b91c1c; --bg:#fafafa; --card:#fff; --muted:#6b7280; --ring:0 0 0 3px rgba(185,28,28,.25); }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;background:var(--bg);color:#111;}
+    header{display:flex;align-items:center;gap:.6rem;padding:1rem 1rem 0}
+    header .logo{width:36px;height:36px;border-radius:9px;background:var(--red);display:grid;place-items:center;color:#fff;font-weight:700}
+    h1{margin:.2rem 0 1rem;font-size:1.6rem;color:var(--red);line-height:1.1}
+    .wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
+    .months{display:flex;flex-wrap:wrap;gap:.6rem;margin:0 0 1rem}
+    .m-btn{padding:.5rem .9rem;border-radius:.6rem;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+    .m-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+    .card{background:var(--card);border:1px solid #eee;border-radius:12px;padding:1rem;margin:1rem 0;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+    .row{display:flex;flex-wrap:wrap;gap:.6rem}
+    .row > *{flex:1 1 180px}
+    label{font-size:.85rem;color:var(--muted)}
+    input[type="text"], input[type="number"]{width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;font-size:16px;min-height:44px}
+    input:focus{outline:none;box-shadow:var(--ring);border-color:var(--red)}
+    .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;padding:.6rem .9rem;cursor:pointer}
+    .btn.red{background:var(--red);color:#fff;border-color:var(--red)}
+    .btn:active{transform:translateY(1px)}
+    .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 .2rem}
+    .summary{margin-top:.7rem;font-weight:600}
+    .summary small{font-weight:400;color:var(--muted)}
+    /* tabuľka so scrollom */
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border-radius:10px;width:100%}
+    table{border-collapse:collapse;width:100%;margin-top:.6rem}
+    table.wide-table{min-width:1100px} /* zaručí horizontálny posun */
+    th,td{border-top:1px solid #eee;padding:.9rem .7rem;text-align:left;background:#fff;vertical-align:middle}
+    th{font-size:.9rem;color:#374151;background:#fafafa}
+    .right{text-align:right}
+    .muted{color:#6b7280}
+    .pill{display:inline-block;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:999px;padding:.15rem .55rem;font-size:.78rem}
+    .danger{color:#b91c1c}.ok{color:#059669}
+    @media (max-width:480px){
+      table.wide-table{min-width:1200px}
+      th,td{padding:1rem .6rem}
+    }
+    @media print{
+      .months,.toolbar,header{display:none}
+      body{background:#fff}
+      .card{border:none;box-shadow:none;padding:0}
+    }
   </style>
 </head>
 <body>
@@ -112,56 +73,49 @@
         <button id="exportXlsx" class="btn">⬇️ Export Excel</button>
         <button id="clearBtn" class="btn">🧹 Vyčistiť mesiac</button>
         <button id="exportBtn" class="btn">↓ Export JSON</button>
-        <label class="btn ghost">
+        <label class="btn">
           ↑ Import JSON
-          <input id="importFile" type="file" accept="application/json" class="hidden">
+          <input id="importFile" type="file" accept="application/json" class="hidden" style="display:none">
         </label>
       </div>
 
       <div class="row mt">
+        <div><label>Fixné náklady €</label><input id="fixne" type="number" inputmode="numeric" min="0" step="1" value="0"></div>
+        <div><label>Cieľ zisku €</label><input id="target" type="number" inputmode="numeric" min="0" step="1" value="0"></div>
         <div>
-          <label>Fixné náklady €</label>
-          <input id="fixne" type="number" inputmode="numeric" min="0" step="1" value="0">
-        </div>
-        <div>
-          <label>Cieľ zisku €</label>
-          <input id="target" type="number" inputmode="numeric" min="0" step="1" value="0">
-        </div>
-        <div>
-          <label class="flex">Voľby</label>
-          <div class="flex">
-            <label class="flex"><input id="carryFixed" type="checkbox"> <span>Prenášať fixné do ďalšieho mesiaca</span></label>
-            <label class="flex"><input id="carryFlagged" type="checkbox"> <span>Prenášať riadky označené „firma“</span></label>
+          <label class="muted">Voľby</label>
+          <div class="row">
+            <label><input id="carryFixed" type="checkbox"> Prenášať fixné do ďalšieho mesiaca</label>
+            <label><input id="carryFlagged" type="checkbox"> Prenášať riadky označené „firma“</label>
           </div>
         </div>
       </div>
-
       <div id="calcLine" class="summary"></div>
     </section>
 
     <section class="card">
       <h2>Prehľad financií za mesiac: <span id="monthName"></span></h2>
-
-      <!-- vodorovný scroll kontajner -->
       <div class="table-wrap">
         <table id="tbl" class="wide-table">
           <thead>
             <tr>
-              <th class="sticky first-col" style="width:34%">Zákazník / Projekt</th>
-              <th class="right" style="width:16%">Príjem (€)</th>
-              <th class="right" style="width:16%">Výdavok (€)</th>
-              <th style="width:26%">Poznámka</th>
+              <th style="width:30%">Zákazník / Projekt</th>
+              <th class="right" style="width:14%">Príjem (€)</th>
+              <th class="right" style="width:14%">Výdavok (€)</th>
+              <th class="right" style="width:12%">Zisk (€)</th>
+              <th style="width:22%">Poznámka</th>
               <th style="width:8%">Akcie</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
           <tfoot>
             <tr>
-              <th class="sticky first-col">Spolu</th>
+              <th>Spolu</th>
               <th class="right" id="sumIn">0</th>
               <th class="right" id="sumOut">0</th>
+              <th class="right"><span id="sumRowProfit">0</span></th>
               <th colspan="2" class="right">
-                <span class="pill"><span class="muted">Zisk</span> <b id="sumProfit">0</b> €</span>
+                <span class="pill"><span class="muted">Zisk (po fixných)</span> <b id="sumProfit">0</b> €</span>
               </th>
             </tr>
           </tfoot>
