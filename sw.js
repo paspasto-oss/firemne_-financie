@@ -1,4 +1,4 @@
-// PWA Service Worker – zvýšená verzia cache + app.js v assets
+// PWA Service Worker – cache s app.js
 const CACHE = 'financie-v4';
 const ASSETS = [
   './',
@@ -23,7 +23,6 @@ self.addEventListener('fetch', e=>{
   const req = e.request;
   e.respondWith(
     caches.match(req).then(res=> res || fetch(req).then(net=>{
-      // cache only same-origin
       if(req.method==='GET' && req.url.startsWith(self.location.origin)){
         const copy = net.clone();
         caches.open(CACHE).then(c=>c.put(req, copy));
