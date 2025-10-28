@@ -387,6 +387,9 @@
     if('serviceWorker' in navigator){
       window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
     }
+    <!-- v <head> -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
+<script defer src="app.js"></script>
   </script>
 </body>
 </html>
