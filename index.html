@@ -46,6 +46,50 @@
     .mt{margin-top:.6rem}
     .hidden{display:none}
     @media print{ .months, .toolbar, header{display:none} .card{box-shadow:none;border:none;padding:0} body{background:#fff} }
+  /* vodorovné posúvanie tabuľky */
+.table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x: contain;
+  border-radius: 10px;
+}
+
+/* minimálna šírka tabuľky – aby sa nerozpadla na úzkom mobile */
+table.wide-table{ min-width: 920px; } /* môžeš zmeniť na 1000px podľa chuti */
+
+/* vyšší riadok pre prst */
+th, td{ padding:.8rem .6rem; }
+
+/* pohodlnejšie inputy na mobile (bez zoomu) */
+td input{
+  width:100%;
+  min-height:44px;          /* tap target */
+  font-size:16px;           /* zabráni auto-zoomu iOS/Android */
+}
+
+/* prvý stĺpec stále viditeľný pri posúvaní do strán */
+.first-col{ min-width: 240px; }  /* nech je na čítanie širší */
+.sticky{
+  position: sticky;
+  left: 0;
+  background:#fff;          /* prekryje obsah pod tým */
+  z-index: 2;               /* nad ostatnými bunkami */
+  border-right: 1px solid #f1f1f1;
+}
+
+/* v záhlaví a pätičke nech sticky drží poriadne */
+thead .sticky, tfoot .sticky{ z-index:3; }
+
+/* voliteľné: jemný tieň na hranici sticky stĺpca */
+.table-wrap .sticky{
+  box-shadow: 1px 0 0 rgba(0,0,0,.05);
+}
+
+/* malé vylepšenia pre veľmi úzke telefóny */
+@media (max-width: 420px){
+  .pill{ font-size:.72rem; }
+  .first-col{ min-width: 260px; }    /* ešte kúsok viac miesta na názov */
+}
   </style>
 </head>
 <body>
