@@ -21,7 +21,7 @@ self.addEventListener('fetch', e=>{
   const req = e.request;
   e.respondWith(
     caches.match(req).then(res=> res || fetch(req).then(net=>{
-      // network-first for json imports
+      // Cacheujeme iba same-origin; CDN pre XLSX pôjde z webu, čo je OK.
       if(req.method==='GET' && req.url.startsWith(self.location.origin)){
         const copy = net.clone();
         caches.open(CACHE).then(c=>c.put(req, copy));
