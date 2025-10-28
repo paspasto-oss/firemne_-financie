@@ -1,11 +1,14 @@
-const CACHE = 'financie-v1';
+// sw.js
+const CACHE = 'financie-v3';            // ↑↑↑ zvýš číslo
 const ASSETS = [
   './',
   './index.html',
+  './app.js',                           // ← pridaj
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
+/* zvyšok nechaj ako máš */
 
 self.addEventListener('install', e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
