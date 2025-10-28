@@ -90,15 +90,14 @@
     save();
   }
 
-  function addRow(r={}, atIndex=null){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input type="text" placeholder="Zákazník / projekt" value="${r.name||''}" enterkeyhint="next"></td>
-      <td class="right"><input type="number" inputmode="numeric" min="0" step="1" value="${r.in||''}" enterkeyhint="next"></td>
-      <td class="right"><input type="number" inputmode="numeric" min="0" step="1" value="${r.out||''}" enterkeyhint="next"></td>
-      <td><input type="text" placeholder="Poznámka (napr. firma – prenášať)" value="${r.pozn||''}" enterkeyhint="done"></td>
-      <td><button class="btn ghost del">🗑️</button></td>`;
-
+  // vo funkcii addRow(...)
+tr.innerHTML = `
+  <td class="sticky first-col"><input type="text" placeholder="Zákazník / projekt" value="${r.name||''}" enterkeyhint="next"></td>
+  <td class="right"><input type="number" ... value="${r.in||''}" enterkeyhint="next"></td>
+  <td class="right"><input type="number" ... value="${r.out||''}" enterkeyhint="next"></td>
+  <td><input type="text" placeholder="Poznámka (napr. firma – prenášať)" value="${r.pozn||''}" enterkeyhint="done"></td>
+  <td><button class="btn ghost del">🗑️</button></td>
+`;
     const [nameEl,inEl,outEl,poznEl] = [
       tr.children[0].firstElementChild,
       tr.children[1].firstElementChild,
