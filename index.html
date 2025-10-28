@@ -7,14 +7,12 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#b91c1c"/>
   <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <!-- XLSX (SheetJS) na export do Excelu -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
   <style>
-    :root{
-      --red:#b91c1c; --red-700:#991b1b; --bg:#fafafa; --card:#fff; --muted:#6b7280;
-      --ring:0 0 0 3px rgba(185,28,28,.25);
-    }
+    :root{ --red:#b91c1c; --red-700:#991b1b; --bg:#fafafa; --card:#fff; --muted:#6b7280; --ring:0 0 0 3px rgba(185,28,28,.25); }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
-         background:var(--bg); color:#111;}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;background:var(--bg);color:#111;}
     header{display:flex;align-items:center;gap:.6rem;padding:1rem 1rem 0}
     header .logo{width:36px;height:36px;border-radius:9px;background:var(--red);display:grid;place-items:center;color:#fff;font-weight:700}
     h1{margin:.2rem 0 1rem;font-size:1.6rem;color:var(--red);line-height:1.1}
@@ -26,12 +24,9 @@
     .row{display:flex;flex-wrap:wrap;gap:.6rem}
     .row > *{flex:1 1 180px}
     label{font-size:.85rem;color:var(--muted)}
-    input[type="text"], input[type="number"]{
-      width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;
-    }
+    input[type="text"], input[type="number"]{width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;}
     input:focus{outline:none;box-shadow:var(--ring);border-color:var(--red)}
-    .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;
-      padding:.6rem .9rem;cursor:pointer}
+    .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;padding:.6rem .9rem;cursor:pointer}
     .btn.red{background:var(--red);color:#fff;border-color:var(--red)}
     .btn.ghost{background:#fff}
     .btn:active{transform:translateY(1px)}
@@ -50,11 +45,7 @@
     .flex{display:flex;align-items:center;gap:.6rem}
     .mt{margin-top:.6rem}
     .hidden{display:none}
-    @media print{
-      .months, .toolbar, header{display:none}
-      .card{box-shadow:none;border:none;padding:0}
-      body{background:#fff}
-    }
+    @media print{ .months, .toolbar, header{display:none} .card{box-shadow:none;border:none;padding:0} body{background:#fff} }
   </style>
 </head>
 <body>
@@ -74,6 +65,7 @@
         <button id="addRow" class="btn red">+ Pridať riadok</button>
         <button id="saveBtn" class="btn">💾 Uložiť</button>
         <button id="printBtn" class="btn">🖨️ Tlačiť</button>
+        <button id="exportXlsx" class="btn">⬇️ Export Excel</button>
         <button id="clearBtn" class="btn">🧹 Vyčistiť mesiac</button>
         <button id="exportBtn" class="btn">↓ Export JSON</button>
         <label class="btn ghost">
@@ -133,9 +125,7 @@
   <script>
     // ======= Pomôcky
     const EUR = n => (Number(n||0)).toLocaleString('sk-SK',{minimumFractionDigits:0,maximumFractionDigits:0});
-    const months = [
-      "Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"
-    ];
+    const months = ["Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"];
     const key = 'fin-tabs-v2';
 
     // ======= Stav
@@ -182,21 +172,25 @@
     const sumProfit = document.getElementById('sumProfit');
     const calcLine = document.getElementById('calcLine');
 
-    document.getElementById('addRow').onclick = ()=> addRow({});
+    document.getElementById('addRow').onclick = ()=>{
+      const tr = addRow({});
+      tr.querySelector('td input[type="text"]').focus();
+    };
     document.getElementById('saveBtn').onclick = save;
     document.getElementById('printBtn').onclick = ()=> window.print();
     document.getElementById('clearBtn').onclick = ()=>{
       if(!confirm('Vyčistiť všetky riadky a sumy v aktuálnom mesiaci?')) return;
       const m = ensureMonth(curYear,curMonth);
       m.rows = []; m.fix = 0; m.target = 0;
-      renderMonth();
-      save();
+      renderMonth(); save();
     };
     document.getElementById('exportBtn').onclick = ()=>{
       const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
       const a = Object.assign(document.createElement('a'),{ href:URL.createObjectURL(blob), download:`financie-${Date.now()}.json`});
       document.body.appendChild(a); a.click(); a.remove();
     };
+    document.getElementById('exportXlsx').onclick = exportExcel;
+
     document.getElementById('importFile').onchange = (e)=>{
       const f = e.target.files[0]; if(!f) return;
       const fr = new FileReader();
@@ -205,10 +199,7 @@
           const data = JSON.parse(String(fr.result||'{}'));
           if(!data || !data.months) throw new Error('Neplatný JSON');
           state = data;
-          renderMonths();
-          openMonth(curYear, curMonth);
-          save();
-          alert('Import hotový.');
+          renderMonths(); openMonth(curYear, curMonth); save(); alert('Import hotový.');
         }catch(err){ alert('Import zlyhal: '+err.message); }
       };
       fr.readAsText(f,'utf8');
@@ -221,7 +212,6 @@
     function openMonth(y, m){
       curYear = y; curMonth = m;
       monthName.textContent = `${months[m]}`;
-      // prenášanie (iba ak je mesiac úplne nový a predchádzajúci existuje)
       const mObj = ensureMonth(y,m);
       const prevK = mKey(y, (m+11)%12);
       const prev = state.months[prevK];
@@ -259,6 +249,7 @@
       recalc();
     }
 
+    // ======= Doplňovanie riadkov (Enter)
     function addRow(r={}, atIndex=null){
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -266,9 +257,7 @@
         <td class="right"><input type="number" inputmode="numeric" min="0" step="1" value="${r.in||''}"></td>
         <td class="right"><input type="number" inputmode="numeric" min="0" step="1" value="${r.out||''}"></td>
         <td><input type="text" placeholder="Poznámka (napr. firma – prenášať)" value="${r.pozn||''}"></td>
-        <td>
-          <button class="btn ghost del">🗑️</button>
-        </td>`;
+        <td><button class="btn ghost del">🗑️</button></td>`;
       const [nameEl,inEl,outEl,poznEl] = [
         tr.children[0].firstElementChild,
         tr.children[1].firstElementChild,
@@ -277,11 +266,30 @@
       ];
       const onInput = ()=>{ upsertRow(); recalc(); };
       [nameEl,inEl,outEl,poznEl].forEach(el=> el.addEventListener('input', onInput));
+
+      // ENTER v poslednom stĺpci => pridaj nový riadok a presuň kurzor
+      poznEl.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' && !e.shiftKey){
+          e.preventDefault();
+          const isLast = tr === tbody.lastElementChild;
+          if(isLast){
+            const newTr = addRow({});
+            tbody.appendChild(newTr);
+            upsertAll(); recalc();
+            newTr.querySelector('td input[type="text"]').focus();
+            newTr.scrollIntoView({behavior:'smooth',block:'center'});
+          }else{
+            // ak nie je posledný, preskoč na ďalší riadok – prvú bunku
+            const next = tr.nextElementSibling;
+            next?.querySelector('td input[type="text"]')?.focus();
+          }
+        }
+      });
+
       tr.querySelector('.del').onclick = ()=>{
-        tr.remove();
-        upsertAll();
-        recalc();
+        tr.remove(); upsertAll(); recalc();
       };
+
       if(atIndex===null) tbody.appendChild(tr);
       else tbody.insertBefore(tr, tbody.children[atIndex]);
 
@@ -296,8 +304,9 @@
         };
         save(false);
       }
-      // keď sa pridá nový riadok, hneď ho vlož do state
+      // hneď vlož do state (aj prázdny riadok)
       upsertAll();
+      return tr;
     }
 
     function upsertAll(){
@@ -324,7 +333,6 @@
       const totalOut = expenses + fixed;
       const profit = incomes - totalOut;
 
-      // koľko chýba do nákladov a do nákladov + cieľa
       const missingToCosts = Math.max(0, totalOut - incomes);
       const missingToAll   = Math.max(0, totalOut + target - incomes);
 
@@ -339,6 +347,40 @@
         `Fixné: <b>${EUR(fixed)} €</b> &nbsp;|&nbsp; ` +
         `Chýba do nákladov: <b>${EUR(missingToCosts)} €</b> &nbsp;|&nbsp; ` +
         `Chýba spolu (náklady + cieľ): <b>${EUR(missingToAll)} €</b> <small>(cieľ ${EUR(target)} €)</small>`;
+    }
+
+    // ======= Export do Excelu
+    function exportExcel(){
+      try{
+        const m = ensureMonth(curYear,curMonth);
+        const incomes = (m.rows||[]).reduce((s,r)=> s + Number(r.in||0), 0);
+        const expenses = (m.rows||[]).reduce((s,r)=> s + Number(r.out||0), 0);
+        const totalOut = expenses + Number(m.fix||0);
+        const profit = incomes - totalOut;
+
+        const aoa = [
+          ['Rok', curYear],
+          ['Mesiac', months[curMonth]],
+          ['Fixné náklady', m.fix||0],
+          ['Cieľ zisku', m.target||0],
+          [],
+          ['Zákazník / Projekt','Príjem (€)','Výdavok (€)','Poznámka']
+        ];
+        (m.rows||[]).forEach(r=> aoa.push([r.name||'', Number(r.in||0), Number(r.out||0), r.pozn||'']));
+        aoa.push([]);
+        aoa.push(['Spolu príjem', incomes]);
+        aoa.push(['Spolu výdavok (vrátane fixných)', totalOut]);
+        aoa.push(['Zisk', profit]);
+
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+        // jednoduché šírky stĺpcov
+        ws['!cols'] = [{wch:30},{wch:14},{wch:16},{wch:30}];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, `${months[curMonth]}`);
+        XLSX.writeFile(wb, `Financie-${curYear}-${String(curMonth+1).padStart(2,'0')}.xlsx`);
+      }catch(err){
+        alert('Export do Excelu sa nepodaril: ' + err.message);
+      }
     }
 
     // ======= PWA
