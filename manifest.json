@@ -1,14 +1,12 @@
 {
-  "name": "Firemné financie",
+  "name": "Firemné financie – mesačné tabuľky",
   "short_name": "Financie",
-  "description": "Mesačné financie s fixnými výdavkami. PWA & offline.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#c40000",
+  "theme_color": "#b91c1c",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
