@@ -7,14 +7,23 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#b91c1c"/>
   <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+
   <!-- XLSX (SheetJS) na export do Excelu -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
+  <!-- Aplikácia -->
+  <script defer src="app.js"></script>
+
   <style>
-    :root{ --red:#b91c1c; --red-700:#991b1b; --bg:#fafafa; --card:#fff; --muted:#6b7280; --ring:0 0 0 3px rgba(185,28,28,.25); }
+    :root{
+      --red:#b91c1c; --bg:#fafafa; --card:#fff; --muted:#6b7280;
+      --ring:0 0 0 3px rgba(185,28,28,.25);
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;background:var(--bg);color:#111;}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+         background:var(--bg); color:#111;}
     header{display:flex;align-items:center;gap:.6rem;padding:1rem 1rem 0}
-    header .logo{width:36px;height:36px;border-radius:9px;background:var(--red);display:grid;place-items:center;color:#fff;font-weight:700}
+    header .logo{width:36px;height:36px;border-radius:9px;background:var(--red);
+      display:grid;place-items:center;color:#fff;font-weight:700}
     h1{margin:.2rem 0 1rem;font-size:1.6rem;color:var(--red);line-height:1.1}
     .wrap{max-width:1100px;margin:0 auto;padding:0 1rem 3rem}
     .months{display:flex;flex-wrap:wrap;gap:.6rem;margin:0 0 1rem}
@@ -24,72 +33,56 @@
     .row{display:flex;flex-wrap:wrap;gap:.6rem}
     .row > *{flex:1 1 180px}
     label{font-size:.85rem;color:var(--muted)}
-    input[type="text"], input[type="number"]{width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;}
+    input[type="text"], input[type="number"]{
+      width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;
+      font-size:16px; /* no-zoom na mobile */
+      min-height:44px; /* tap target */
+    }
     input:focus{outline:none;box-shadow:var(--ring);border-color:var(--red)}
-    .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;padding:.6rem .9rem;cursor:pointer}
+    .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;
+      padding:.6rem .9rem;cursor:pointer}
     .btn.red{background:var(--red);color:#fff;border-color:var(--red)}
     .btn.ghost{background:#fff}
     .btn:active{transform:translateY(1px)}
     .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 .2rem}
     .summary{margin-top:.7rem;font-weight:600}
     .summary small{font-weight:400;color:var(--muted)}
+
+    /* TABUĽKA – širšia, s vodorovným posúvaním a sticky prvým stĺpcom */
+    .table-wrap{
+      overflow-x:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
+      border-radius:10px;
+    }
     table{width:100%;border-collapse:collapse;margin-top:.6rem}
-    th,td{border-top:1px solid #eee;padding:.6rem .5rem;text-align:left}
+    table.wide-table{ min-width: 1000px; } /* nastav podľa chuti (920–1200px) */
+    th,td{border-top:1px solid #eee;padding:.8rem .6rem;text-align:left;background:#fff}
     th{font-size:.9rem;color:#374151;background:#fafafa}
-    td input{width:100%}
     .right{text-align:right}
     .muted{color:var(--muted)}
     .pill{display:inline-block;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:999px;padding:.15rem .55rem;font-size:.78rem}
-    .danger{color:var(--red)}
+    .danger{color:#b91c1c}
     .ok{color:#059669}
     .flex{display:flex;align-items:center;gap:.6rem}
     .mt{margin-top:.6rem}
     .hidden{display:none}
-    @media print{ .months, .toolbar, header{display:none} .card{box-shadow:none;border:none;padding:0} body{background:#fff} }
-  /* vodorovné posúvanie tabuľky */
-.table-wrap{
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior-x: contain;
-  border-radius: 10px;
-}
 
-/* minimálna šírka tabuľky – aby sa nerozpadla na úzkom mobile */
-table.wide-table{ min-width: 920px; } /* môžeš zmeniť na 1000px podľa chuti */
+    /* Sticky prvý stĺpec (názov) */
+    .first-col{ min-width:240px; }
+    .sticky{ position:sticky; left:0; z-index:2; background:#fff; border-right:1px solid #f1f1f1; box-shadow:1px 0 0 rgba(0,0,0,.05); }
+    thead .sticky, tfoot .sticky{ z-index:3; }
 
-/* vyšší riadok pre prst */
-th, td{ padding:.8rem .6rem; }
+    @media (max-width:420px){
+      .first-col{ min-width:260px; }
+      .pill{ font-size:.72rem; }
+    }
 
-/* pohodlnejšie inputy na mobile (bez zoomu) */
-td input{
-  width:100%;
-  min-height:44px;          /* tap target */
-  font-size:16px;           /* zabráni auto-zoomu iOS/Android */
-}
-
-/* prvý stĺpec stále viditeľný pri posúvaní do strán */
-.first-col{ min-width: 240px; }  /* nech je na čítanie širší */
-.sticky{
-  position: sticky;
-  left: 0;
-  background:#fff;          /* prekryje obsah pod tým */
-  z-index: 2;               /* nad ostatnými bunkami */
-  border-right: 1px solid #f1f1f1;
-}
-
-/* v záhlaví a pätičke nech sticky drží poriadne */
-thead .sticky, tfoot .sticky{ z-index:3; }
-
-/* voliteľné: jemný tieň na hranici sticky stĺpca */
-.table-wrap .sticky{
-  box-shadow: 1px 0 0 rgba(0,0,0,.05);
-}
-
-/* malé vylepšenia pre veľmi úzke telefóny */
-@media (max-width: 420px){
-  .pill{ font-size:.72rem; }
-  .first-col{ min-width: 260px; }    /* ešte kúsok viac miesta na názov */
-}
+    @media print{
+      .months, .toolbar, header{display:none}
+      .card{box-shadow:none;border:none;padding:0}
+      body{background:#fff}
+      table.wide-table{ min-width:auto; }
+      .sticky{ position:static; box-shadow:none; }
+    }
   </style>
 </head>
 <body>
@@ -140,303 +133,34 @@ thead .sticky, tfoot .sticky{ z-index:3; }
     </section>
 
     <section class="card">
-  <h2>Prehľad financií za mesiac: <span id="monthName"></span></h2>
+      <h2>Prehľad financií za mesiac: <span id="monthName"></span></h2>
 
-  <!-- NOVÉ: vodorovný scroll kontajner -->
-  <div class="table-wrap">
-    <table id="tbl" class="wide-table">
-      <thead>
-        <tr>
-          <th class="sticky first-col" style="width:34%">Zákazník / Projekt</th>
-          <th class="right" style="width:16%">Príjem (€)</th>
-          <th class="right" style="width:16%">Výdavok (€)</th>
-          <th style="width:26%">Poznámka</th>
-          <th style="width:8%">Akcie</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-      <tfoot>
-        <tr>
-          <th class="sticky first-col">Spolu</th>
-          <th class="right" id="sumIn">0</th>
-          <th class="right" id="sumOut">0</th>
-          <th colspan="2" class="right">
-            <span class="pill"><span class="muted">Zisk</span> <b id="sumProfit">0</b> €</span>
-          </th>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+      <!-- vodorovný scroll kontajner -->
+      <div class="table-wrap">
+        <table id="tbl" class="wide-table">
+          <thead>
+            <tr>
+              <th class="sticky first-col" style="width:34%">Zákazník / Projekt</th>
+              <th class="right" style="width:16%">Príjem (€)</th>
+              <th class="right" style="width:16%">Výdavok (€)</th>
+              <th style="width:26%">Poznámka</th>
+              <th style="width:8%">Akcie</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+          <tfoot>
+            <tr>
+              <th class="sticky first-col">Spolu</th>
+              <th class="right" id="sumIn">0</th>
+              <th class="right" id="sumOut">0</th>
+              <th colspan="2" class="right">
+                <span class="pill"><span class="muted">Zisk</span> <b id="sumProfit">0</b> €</span>
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </section>
-
-  <script>
-    // ======= Pomôcky
-    const EUR = n => (Number(n||0)).toLocaleString('sk-SK',{minimumFractionDigits:0,maximumFractionDigits:0});
-    const months = ["Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"];
-    const key = 'fin-tabs-v2';
-
-    // ======= Stav
-    let state = JSON.parse(localStorage.getItem(key) || '{}');
-    if(!state.meta){ state.meta = { carryFixed: true, carryFlagged: true }; }
-    if(!state.months){ state.months = {}; }
-    const now = new Date();
-    const y = now.getFullYear();
-
-    function mKey(y, m){ return `${y}-${String(m+1).padStart(2,'0')}`; }
-    function ensureMonth(y, m){
-      const k = mKey(y,m);
-      if(!state.months[k]) state.months[k] = { fix:0, target:0, rows:[] };
-      return state.months[k];
-    }
-
-    // ======= UI init
-    const monthsBar = document.getElementById('months');
-    const monthName = document.getElementById('monthName');
-    const tbody = document.getElementById('tbody');
-
-    let curYear = y, curMonth = now.getMonth();
-    renderMonths();
-    openMonth(curYear, curMonth);
-
-    function renderMonths(){
-      monthsBar.innerHTML = '';
-      months.forEach((label, i)=>{
-        const b = document.createElement('button');
-        b.className = 'm-btn'+(i===curMonth?' active':'');
-        b.textContent = label;
-        b.onclick = ()=>{ document.querySelectorAll('.m-btn').forEach(el=>el.classList.remove('active')); b.classList.add('active'); openMonth(curYear,i); };
-        monthsBar.appendChild(b);
-      });
-    }
-
-    // ======= Ovládače
-    const fixne = document.getElementById('fixne');
-    const target = document.getElementById('target');
-    const carryFixed = document.getElementById('carryFixed');
-    const carryFlagged = document.getElementById('carryFlagged');
-    const sumIn = document.getElementById('sumIn');
-    const sumOut = document.getElementById('sumOut');
-    const sumProfit = document.getElementById('sumProfit');
-    const calcLine = document.getElementById('calcLine');
-
-    document.getElementById('addRow').onclick = ()=>{
-      const tr = addRow({});
-      tr.querySelector('td input[type="text"]').focus();
-    };
-    document.getElementById('saveBtn').onclick = save;
-    document.getElementById('printBtn').onclick = ()=> window.print();
-    document.getElementById('clearBtn').onclick = ()=>{
-      if(!confirm('Vyčistiť všetky riadky a sumy v aktuálnom mesiaci?')) return;
-      const m = ensureMonth(curYear,curMonth);
-      m.rows = []; m.fix = 0; m.target = 0;
-      renderMonth(); save();
-    };
-    document.getElementById('exportBtn').onclick = ()=>{
-      const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-      const a = Object.assign(document.createElement('a'),{ href:URL.createObjectURL(blob), download:`financie-${Date.now()}.json`});
-      document.body.appendChild(a); a.click(); a.remove();
-    };
-    document.getElementById('exportXlsx').onclick = exportExcel;
-
-    document.getElementById('importFile').onchange = (e)=>{
-      const f = e.target.files[0]; if(!f) return;
-      const fr = new FileReader();
-      fr.onload = ()=>{
-        try{
-          const data = JSON.parse(String(fr.result||'{}'));
-          if(!data || !data.months) throw new Error('Neplatný JSON');
-          state = data;
-          renderMonths(); openMonth(curYear, curMonth); save(); alert('Import hotový.');
-        }catch(err){ alert('Import zlyhal: '+err.message); }
-      };
-      fr.readAsText(f,'utf8');
-    };
-
-    [fixne,target].forEach(inp=> inp.addEventListener('input', ()=> { applyInputs(); recalc(); }));
-    carryFixed.onchange = ()=>{ state.meta.carryFixed = carryFixed.checked; save(); };
-    carryFlagged.onchange = ()=>{ state.meta.carryFlagged = carryFlagged.checked; save(); };
-
-    function openMonth(y, m){
-      curYear = y; curMonth = m;
-      monthName.textContent = `${months[m]}`;
-      const mObj = ensureMonth(y,m);
-      const prevK = mKey(y, (m+11)%12);
-      const prev = state.months[prevK];
-      if(mObj.rows.length===0 && prev){
-        if(state.meta.carryFixed && mObj.fix===0) mObj.fix = prev.fix||0;
-        if(state.meta.carryFlagged && prev.rows?.length){
-          const carryRows = prev.rows.filter(r=> r.pozn?.toLowerCase().includes('firma'));
-          if(carryRows.length) mObj.rows = carryRows.map(r=> ({...r, in:0, out:r.out||0}));
-        }
-      }
-      renderMonth();
-    }
-
-    function applyInputs(){
-      const m = ensureMonth(curYear,curMonth);
-      m.fix = Number(fixne.value||0);
-      m.target = Number(target.value||0);
-      save(false);
-    }
-
-    function save(showToast=true){
-      localStorage.setItem(key, JSON.stringify(state));
-      if(showToast){ console.log('Uložené'); }
-    }
-
-    function renderMonth(){
-      const m = ensureMonth(curYear,curMonth);
-      fixne.value = m.fix||0;
-      target.value = m.target||0;
-      carryFixed.checked = !!state.meta.carryFixed;
-      carryFlagged.checked = !!state.meta.carryFlagged;
-
-      tbody.innerHTML = '';
-      (m.rows||[]).forEach((r, idx)=> addRow(r, idx));
-      recalc();
-    }
-
-    // ======= Doplňovanie riadkov (Enter)
-    function addRow(r={}, atIndex=null){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input type="text" placeholder="Zákazník / projekt" value="${r.name||''}"></td>
-        <td class="right"><input type="number" inputmode="numeric" min="0" step="1" value="${r.in||''}"></td>
-        <td class="right"><input type="number" inputmode="numeric" min="0" step="1" value="${r.out||''}"></td>
-        <td><input type="text" placeholder="Poznámka (napr. firma – prenášať)" value="${r.pozn||''}"></td>
-        <td><button class="btn ghost del">🗑️</button></td>`;
-      const [nameEl,inEl,outEl,poznEl] = [
-        tr.children[0].firstElementChild,
-        tr.children[1].firstElementChild,
-        tr.children[2].firstElementChild,
-        tr.children[3].firstElementChild,
-      ];
-      const onInput = ()=>{ upsertRow(); recalc(); };
-      [nameEl,inEl,outEl,poznEl].forEach(el=> el.addEventListener('input', onInput));
-
-      // ENTER v poslednom stĺpci => pridaj nový riadok a presuň kurzor
-      poznEl.addEventListener('keydown', (e)=>{
-        if(e.key==='Enter' && !e.shiftKey){
-          e.preventDefault();
-          const isLast = tr === tbody.lastElementChild;
-          if(isLast){
-            const newTr = addRow({});
-            tbody.appendChild(newTr);
-            upsertAll(); recalc();
-            newTr.querySelector('td input[type="text"]').focus();
-            newTr.scrollIntoView({behavior:'smooth',block:'center'});
-          }else{
-            // ak nie je posledný, preskoč na ďalší riadok – prvú bunku
-            const next = tr.nextElementSibling;
-            next?.querySelector('td input[type="text"]')?.focus();
-          }
-        }
-      });
-
-      tr.querySelector('.del').onclick = ()=>{
-        tr.remove(); upsertAll(); recalc();
-      };
-
-      if(atIndex===null) tbody.appendChild(tr);
-      else tbody.insertBefore(tr, tbody.children[atIndex]);
-
-      function upsertRow(){
-        const m = ensureMonth(curYear,curMonth);
-        const idx = Array.from(tbody.children).indexOf(tr);
-        m.rows[idx] = {
-          name: nameEl.value.trim(),
-          in: Number(inEl.value||0),
-          out: Number(outEl.value||0),
-          pozn: poznEl.value.trim()
-        };
-        save(false);
-      }
-      // hneď vlož do state (aj prázdny riadok)
-      upsertAll();
-      return tr;
-    }
-
-    function upsertAll(){
-      const m = ensureMonth(curYear,curMonth);
-      m.rows = Array.from(tbody.children).map(tr=>{
-        const tds = tr.querySelectorAll('td');
-        return {
-          name: tds[0].querySelector('input').value.trim(),
-          in:   Number(tds[1].querySelector('input').value||0),
-          out:  Number(tds[2].querySelector('input').value||0),
-          pozn: tds[3].querySelector('input').value.trim(),
-        };
-      });
-      save(false);
-    }
-
-    function recalc(){
-      const m = ensureMonth(curYear,curMonth);
-      const incomes = (m.rows||[]).reduce((s,r)=> s + Number(r.in||0), 0);
-      const expenses = (m.rows||[]).reduce((s,r)=> s + Number(r.out||0), 0);
-      const fixed = Number(m.fix||0);
-      const target = Number(m.target||0);
-
-      const totalOut = expenses + fixed;
-      const profit = incomes - totalOut;
-
-      const missingToCosts = Math.max(0, totalOut - incomes);
-      const missingToAll   = Math.max(0, totalOut + target - incomes);
-
-      sumIn.textContent = EUR(incomes);
-      sumOut.textContent = EUR(totalOut);
-      sumProfit.textContent = EUR(profit);
-
-      const cls = profit >= 0 ? 'ok' : 'danger';
-      sumProfit.parentElement.classList.remove('ok','danger'); sumProfit.parentElement.classList.add(cls);
-
-      calcLine.innerHTML =
-        `Fixné: <b>${EUR(fixed)} €</b> &nbsp;|&nbsp; ` +
-        `Chýba do nákladov: <b>${EUR(missingToCosts)} €</b> &nbsp;|&nbsp; ` +
-        `Chýba spolu (náklady + cieľ): <b>${EUR(missingToAll)} €</b> <small>(cieľ ${EUR(target)} €)</small>`;
-    }
-
-    // ======= Export do Excelu
-    function exportExcel(){
-      try{
-        const m = ensureMonth(curYear,curMonth);
-        const incomes = (m.rows||[]).reduce((s,r)=> s + Number(r.in||0), 0);
-        const expenses = (m.rows||[]).reduce((s,r)=> s + Number(r.out||0), 0);
-        const totalOut = expenses + Number(m.fix||0);
-        const profit = incomes - totalOut;
-
-        const aoa = [
-          ['Rok', curYear],
-          ['Mesiac', months[curMonth]],
-          ['Fixné náklady', m.fix||0],
-          ['Cieľ zisku', m.target||0],
-          [],
-          ['Zákazník / Projekt','Príjem (€)','Výdavok (€)','Poznámka']
-        ];
-        (m.rows||[]).forEach(r=> aoa.push([r.name||'', Number(r.in||0), Number(r.out||0), r.pozn||'']));
-        aoa.push([]);
-        aoa.push(['Spolu príjem', incomes]);
-        aoa.push(['Spolu výdavok (vrátane fixných)', totalOut]);
-        aoa.push(['Zisk', profit]);
-
-        const ws = XLSX.utils.aoa_to_sheet(aoa);
-        // jednoduché šírky stĺpcov
-        ws['!cols'] = [{wch:30},{wch:14},{wch:16},{wch:30}];
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, `${months[curMonth]}`);
-        XLSX.writeFile(wb, `Financie-${curYear}-${String(curMonth+1).padStart(2,'0')}.xlsx`);
-      }catch(err){
-        alert('Export do Excelu sa nepodaril: ' + err.message);
-      }
-    }
-
-    // ======= PWA
-    if('serviceWorker' in navigator){
-      window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
-    }
-    <!-- v <head> -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
-<script defer src="app.js"></script>
-  </script>
+  </div>
 </body>
 </html>
