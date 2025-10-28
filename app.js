@@ -1,4 +1,4 @@
-/* app.js – horizontálny scroll bez sticky + zisk v každom riadku */
+/* app.js – širšie riadky, riadkový zisk, štatistické karty, Excel export */
 (() => {
   const EUR = n => (Number(n||0)).toLocaleString('sk-SK',{minimumFractionDigits:0,maximumFractionDigits:0});
   const months = ["Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"];
@@ -22,7 +22,15 @@
   const sumOut = $('#sumOut');
   const sumRowProfit = $('#sumRowProfit');
   const sumProfit = $('#sumProfit');
-  const calcLine = $('#calcLine');
+
+  // štatistické karty
+  const sFix = document.getElementById('sFix');
+  const sMissCosts = document.getElementById('sMissCosts');
+  const sMissAll = document.getElementById('sMissAll');
+  const sTarget = document.getElementById('sTarget');
+  const cardFix = document.getElementById('cardFix');
+  const cardMissC = document.getElementById('cardMissC');
+  const cardMissAll = document.getElementById('cardMissAll');
 
   let curYear = YEAR, curMonth = now.getMonth();
 
@@ -82,7 +90,7 @@
       name: tds[0].querySelector('input').value.trim(),
       in:   Number(tds[1].querySelector('input').value||0),
       out:  Number(tds[2].querySelector('input').value||0),
-      pozn: tds[4].querySelector('input').value.trim(), // POZOR: index 4 (kvôli stĺpcu Zisk)
+      pozn: tds[4].querySelector('input').value.trim(), // kvôli stĺpcu Zisk
     };
   }
   function upsertAll(){
@@ -119,17 +127,17 @@
     const onChange = ()=>{ updateRowProfit(tr); upsertAll(); recalc(); };
     [nameEl,inEl,outEl,poznEl].forEach(el=> el.addEventListener('input', onChange));
 
-    // ENTER v poznámke
+    // ENTER v poznámke (desktop)
     poznEl.addEventListener('keydown', e=>{
       if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); addAfterIfNeeded(tr); }
     });
-    // mobilné vloženie \n
+    // Mobil: vloženie \n bez keydown
     poznEl.addEventListener('beforeinput', ev=>{ if(ev.inputType==='insertLineBreak'){ ev.preventDefault(); addAfterIfNeeded(tr); }});
     poznEl.addEventListener('input', e=>{
       const v = e.target.value;
       if(v.includes('\n')){ e.target.value = v.replace(/\n/g,''); addAfterIfNeeded(tr); }
     });
-    // auto-add po odchode
+    // Auto-add po odchode z posledného riadka, keď je vyplnený
     poznEl.addEventListener('blur', ()=>{
       const isLast = tr === tbody.lastElementChild;
       const hasData = [nameEl,inEl,outEl,poznEl].some(el => (el.value||'').trim() !== '');
@@ -173,17 +181,27 @@
     sumOut.textContent = EUR(expenses);
     sumRowProfit.textContent = EUR(rowProfitSum);
     sumProfit.textContent = EUR(profitAfterFixed);
-
-    const cls = profitAfterFixed >= 0 ? 'ok' : 'danger';
-    sumProfit.parentElement.classList.remove('ok','danger');
-    sumProfit.parentElement.classList.add(cls);
+    sumProfit.parentElement.classList.toggle('ok', profitAfterFixed >= 0);
+    sumProfit.parentElement.classList.toggle('danger', profitAfterFixed < 0);
 
     const missingToCosts = Math.max(0, totalOut - incomes);
     const missingToAll   = Math.max(0, totalOut + targetVal - incomes);
-    calcLine.innerHTML =
-      `Fixné: <b>${EUR(fixed)} €</b> &nbsp;|&nbsp; ` +
-      `Chýba do nákladov: <b>${EUR(missingToCosts)} €</b> &nbsp;|&nbsp; ` +
-      `Chýba spolu (náklady + cieľ): <b>${EUR(missingToAll)} €</b> <small>(cieľ ${EUR(targetVal)} €)</small>`;
+
+    // Štatistické karty
+    sFix.textContent = `${EUR(fixed)} €`;
+    sMissCosts.textContent = `${EUR(missingToCosts)} €`;
+    sMissAll.textContent = `${EUR(missingToAll)} €`;
+    sTarget.textContent = `(cieľ ${EUR(targetVal)} €)`;
+
+    function setState(el, value){
+      el.classList.remove('ok','warn','danger');
+      if(value <= 0) el.classList.add('ok');
+      else if(value <= (fixed + targetVal) * 0.25) el.classList.add('warn');
+      else el.classList.add('danger');
+    }
+    setState(cardFix, fixed > 0 ? 0 : -1);  // neutrál
+    setState(cardMissC, missingToCosts);
+    setState(cardMissAll, missingToAll);
   }
 
   /* ==== CONTROLS ==== */
