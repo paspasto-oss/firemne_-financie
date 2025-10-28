@@ -1,4 +1,4 @@
-/* app.js */
+/* app.js – mobil-friendly riadky + Excel export + sticky first col */
 (() => {
   const EUR = n => (Number(n||0)).toLocaleString('sk-SK',{minimumFractionDigits:0,maximumFractionDigits:0});
   const months = ["Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"];
@@ -33,7 +33,7 @@
   }
   function save(){ localStorage.setItem(key, JSON.stringify(state)); }
 
-  /* ===== UI init ===== */
+  /* ==== INIT ==== */
   function renderMonths(){
     monthsBar.innerHTML = '';
     months.forEach((label, i)=>{
@@ -74,7 +74,7 @@
     recalc();
   }
 
-  /* ===== Row helpers ===== */
+  /* ==== ROWS ==== */
   function rowDataFromTR(tr){
     const tds = tr.querySelectorAll('td');
     return {
@@ -90,14 +90,15 @@
     save();
   }
 
-  // vo funkcii addRow(...)
-tr.innerHTML = `
-  <td class="sticky first-col"><input type="text" placeholder="Zákazník / projekt" value="${r.name||''}" enterkeyhint="next"></td>
-  <td class="right"><input type="number" ... value="${r.in||''}" enterkeyhint="next"></td>
-  <td class="right"><input type="number" ... value="${r.out||''}" enterkeyhint="next"></td>
-  <td><input type="text" placeholder="Poznámka (napr. firma – prenášať)" value="${r.pozn||''}" enterkeyhint="done"></td>
-  <td><button class="btn ghost del">🗑️</button></td>
-`;
+  function addRow(r={}, atIndex=null){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="sticky first-col"><input type="text" placeholder="Zákazník / projekt" value="${r.name||''}" enterkeyhint="next"></td>
+      <td class="right"><input type="number" inputmode="numeric" min="0" step="1" value="${r.in||''}" enterkeyhint="next"></td>
+      <td class="right"><input type="number" inputmode="numeric" min="0" step="1" value="${r.out||''}" enterkeyhint="next"></td>
+      <td><input type="text" placeholder="Poznámka (napr. firma – prenášať)" value="${r.pozn||''}" enterkeyhint="done"></td>
+      <td><button class="btn ghost del">🗑️</button></td>`;
+
     const [nameEl,inEl,outEl,poznEl] = [
       tr.children[0].firstElementChild,
       tr.children[1].firstElementChild,
@@ -108,22 +109,17 @@ tr.innerHTML = `
     const onChange = ()=>{ upsertAll(); recalc(); };
     [nameEl,inEl,outEl,poznEl].forEach(el=> el.addEventListener('input', onChange));
 
-    // 1) Desktop Enter
+    // ENTER v poznámke (desktop)
     poznEl.addEventListener('keydown', e=>{
       if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); addAfterIfNeeded(tr); }
     });
-    // 2) Mobile – některé klávesnice pošlú \n do textu bez keydown
-    const detectNewline = (e)=>{
-      const val = e.target.value;
-      if(val.includes('\n')){
-        e.target.value = val.replace(/\n/g,''); // odstráň zalomenie
-        addAfterIfNeeded(tr);
-      }
-    };
+    // Mobile: zachyť vloženie \n aj bez keydown
     poznEl.addEventListener('beforeinput', ev => { if(ev.inputType==='insertLineBreak'){ ev.preventDefault(); addAfterIfNeeded(tr); }});
-    poznEl.addEventListener('input', detectNewline);
-
-    // 3) Auto-add po odchode z posledného riadku, keď je niečo vyplnené
+    poznEl.addEventListener('input', e=>{
+      const v = e.target.value;
+      if(v.includes('\n')){ e.target.value = v.replace(/\n/g,''); addAfterIfNeeded(tr); }
+    });
+    // Auto-add po odchode, keď je to posledný riadok a je vyplnený
     poznEl.addEventListener('blur', ()=>{
       const isLast = tr === tbody.lastElementChild;
       const hasData = [nameEl,inEl,outEl,poznEl].some(el => (el.value||'').trim() !== '');
@@ -150,7 +146,7 @@ tr.innerHTML = `
     }
   }
 
-  /* ===== Recalc ===== */
+  /* ==== RECALC ==== */
   function recalc(){
     const m = ensureMonth(curYear,curMonth);
     const incomes = (m.rows||[]).reduce((s,r)=> s + Number(r.in||0), 0);
@@ -174,8 +170,8 @@ tr.innerHTML = `
       `Chýba spolu (náklady + cieľ): <b>${EUR(missingToAll)} €</b> <small>(cieľ ${EUR(targetVal)} €)</small>`;
   }
 
-  /* ===== Controls ===== */
-  $('#addRow').onclick = ()=> {
+  /* ==== CONTROLS ==== */
+  $('#addRow').onclick = ()=>{
     const tr = addRow({});
     tr.querySelector('td input[type="text"]').focus();
     upsertAll(); recalc();
@@ -193,7 +189,7 @@ tr.innerHTML = `
     const a = Object.assign(document.createElement('a'),{ href:URL.createObjectURL(blob), download:`financie-${Date.now()}.json`});
     document.body.appendChild(a); a.click(); a.remove();
   };
-  $('#exportXlsx')?.addEventListener('click', ()=>{
+  $('#exportXlsx').addEventListener('click', ()=>{
     const m = ensureMonth(curYear,curMonth);
     const incomes = (m.rows||[]).reduce((s,r)=> s + Number(r.in||0), 0);
     const expenses = (m.rows||[]).reduce((s,r)=> s + Number(r.out||0), 0);
@@ -209,7 +205,10 @@ tr.innerHTML = `
       ['Zákazník / Projekt','Príjem (€)','Výdavok (€)','Poznámka']
     ];
     (m.rows||[]).forEach(r=> aoa.push([r.name||'', Number(r.in||0), Number(r.out||0), r.pozn||'']));
-    aoa.push([]); aoa.push(['Spolu príjem', incomes]); aoa.push(['Spolu výdavok (vrátane fixných)', totalOut]); aoa.push(['Zisk', profit]);
+    aoa.push([]);
+    aoa.push(['Spolu príjem', incomes]);
+    aoa.push(['Spolu výdavok (vrátane fixných)', totalOut]);
+    aoa.push(['Zisk', profit]);
 
     const ws = XLSX.utils.aoa_to_sheet(aoa);
     ws['!cols'] = [{wch:30},{wch:14},{wch:16},{wch:30}];
@@ -218,7 +217,7 @@ tr.innerHTML = `
     XLSX.writeFile(wb, `Financie-${curYear}-${String(curMonth+1).padStart(2,'0')}.xlsx`);
   });
 
-  [fixne,target].forEach(inp=> inp.addEventListener('input', ()=>{ 
+  [fixne,target].forEach(inp=> inp.addEventListener('input', ()=>{
     const m = ensureMonth(curYear,curMonth);
     if(inp===fixne) m.fix = Number(inp.value||0); else m.target = Number(inp.value||0);
     save(); recalc();
