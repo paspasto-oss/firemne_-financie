@@ -89,19 +89,54 @@
   input[type="text"], input[type="number"]{
     background:#111418; border-color:#2f3540; color:#f3f4f6;
   }
-  input::placeholder{ color:#6b7280; }
+  /* === 🌙 DARK MODE – moderný kontrastný štýl === */
+@media (prefers-color-scheme: dark) {
+  :root{
+    --bg: #111418;
+    --card: #1b1f24;
+    --muted: #9ca3af;
+    --red: #ef4444;
+    --ring: 0 0 0 3px rgba(239,68,68,.25);
+  }
+
+  body{ color:#e5e7eb; background:var(--bg); }
+  h1,h2{ color:#f3f4f6; }
+  header .logo{ background:var(--red); color:#fff; }
+
+  .card{ border-color:#2a2f35; background:var(--card); box-shadow:none; }
   .m-btn{ background:#1f242a; color:#e5e7eb; border-color:#374151; }
   .m-btn.active{ background:var(--red); color:#fff; border-color:var(--red); }
   .btn{ background:#2a3036; border-color:#374151; color:#f3f4f6; }
   .btn.red{ background:var(--red); border-color:var(--red); color:#fff; }
-  table{ background:var(--card); color:#f3f4f6; }
-  th{ background:#2a2f35; color:#d1d5db; }
-  td{ border-top-color:#2a2f35; }
   .pill{ background:#2f3540; border-color:#374151; color:#f3f4f6; }
+
+  table{ background:var(--card); color:#f3f4f6; border-radius:12px; overflow:hidden; }
+  th{ background:#242930; color:#d1d5db; }
+  td{ border-top-color:#2a2f35; }
+
+  /* 🔸 INPUT POLIA – kontrastné, jemné orámovanie */
+  input[type="text"], input[type="number"]{
+    background:#23272f;
+    border:1px solid #3b414a;
+    color:#f3f4f6;
+    border-radius:8px;
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus{
+    border-color:var(--red);
+    box-shadow:0 0 0 2px rgba(239,68,68,.3);
+    outline:none;
+  }
+  input::placeholder{ color:#6b7280; }
+
+  /* štatistické karty */
   .stat{ border-color:#2f3540; background:#1e2329; }
   .stat-label{ color:#9ca3af; }
   .stat-value{ color:#f9fafb; }
   .stat-sub{ color:#9ca3af; }
+
+  /* mesiace toolbar */
+  .months{background:transparent;}
 }
   </style>
 </head>
