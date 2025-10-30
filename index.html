@@ -73,23 +73,7 @@
       body{background:#fff}
       .card{border:none;box-shadow:none;padding:0}
     }
-    /* === 🌙 DARK MODE === */
-@media (prefers-color-scheme: dark) {
-  :root{
-    --bg: #111418;
-    --card: #1b1f24;
-    --muted: #9ca3af;
-    --red: #ef4444;
-    --ring: 0 0 0 3px rgba(239,68,68,.25);
-  }
-  body{ color:#e5e7eb; background:var(--bg); }
-  .card{ border-color:#2a2f35; background:var(--card); box-shadow:none; }
-  h1{ color:var(--red); }
-  h2{ color:#f3f4f6; }
-  input[type="text"], input[type="number"]{
-    background:#111418; border-color:#2f3540; color:#f3f4f6;
-  }
-  /* === 🌙 DARK MODE – moderný kontrastný štýl === */
+    /* === 🌙 DARK MODE – moderný kontrastný štýl so šedými riadkami === */
 @media (prefers-color-scheme: dark) {
   :root{
     --bg: #111418;
@@ -114,9 +98,9 @@
   th{ background:#242930; color:#d1d5db; }
   td{ border-top-color:#2a2f35; }
 
-  /* 🔸 INPUT POLIA – kontrastné, jemné orámovanie */
+  /* 🔸 INPUT POLIA – šedé, kontrastné, menej čierne */
   input[type="text"], input[type="number"]{
-    background:#23272f;
+    background:#2a2f35;      /* 🔹 šedé pole namiesto čierneho */
     border:1px solid #3b414a;
     color:#f3f4f6;
     border-radius:8px;
@@ -129,14 +113,10 @@
   }
   input::placeholder{ color:#6b7280; }
 
-  /* štatistické karty */
   .stat{ border-color:#2f3540; background:#1e2329; }
   .stat-label{ color:#9ca3af; }
   .stat-value{ color:#f9fafb; }
   .stat-sub{ color:#9ca3af; }
-
-  /* mesiace toolbar */
-  .months{background:transparent;}
 }
   </style>
 </head>
