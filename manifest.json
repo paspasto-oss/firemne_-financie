@@ -1,10 +1,10 @@
 {
-  "name": "Firemné financie – mesačné tabuľky",
-  "short_name": "Financie",
+  "name": "Firemné financie",
+  "short_name": "FF",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#b91c1c",
+  "background_color": "#111418",
+  "theme_color": "#ef4444",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
