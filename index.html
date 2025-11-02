@@ -1,16 +1,15 @@
 <!doctype html>
 <html lang="sk">
 <head>
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#111418">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Firemné financie – mesačné tabuľky</title>
+
+  <!-- Ikony -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#b91c1c"/>
-  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <meta name="theme-color" content="#111418"/>
 
   <!-- XLSX (SheetJS) na export do Excelu -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
@@ -18,7 +17,10 @@
   <script defer src="app.js"></script>
 
   <style>
-    :root{ --red:#b91c1c; --bg:#fafafa; --card:#fff; --muted:#6b7280; --ring:0 0 0 3px rgba(185,28,28,.25); }
+    :root{
+      --red:#b91c1c; --bg:#fafafa; --card:#fff; --muted:#6b7280;
+      --ring:0 0 0 3px rgba(185,28,28,.25);
+    }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;background:var(--bg);color:#111;}
     header{display:flex;align-items:center;gap:.6rem;padding:1rem 1rem 0}
@@ -32,96 +34,94 @@
     .row{display:flex;flex-wrap:wrap;gap:.6rem}
     .row > *{flex:1 1 180px}
     label{font-size:.85rem;color:var(--muted)}
-    input[type="text"], input[type="number"]{width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;font-size:16px;min-height:44px}
+    input[type="text"], input[type="number"]{
+      width:100%;padding:.65rem .75rem;border:1px solid #e5e7eb;border-radius:.6rem;background:#fff;
+      font-size:16px;min-height:44px
+    }
     input:focus{outline:none;box-shadow:var(--ring);border-color:var(--red)}
     .btn{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #e5e7eb;background:#fff;border-radius:.7rem;padding:.6rem .9rem;cursor:pointer}
     .btn.red{background:var(--red);color:#fff;border-color:var(--red)}
     .btn:active{transform:translateY(1px)}
     .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0 .2rem}
-
-    /* --- pekné štatistické karty --- */
-    .stats{
-      display:grid; grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:.7rem; margin-top:.8rem;
-    }
-    .stat{
-      background:#fff; border:1px solid #eee; border-radius:12px;
-      padding:.8rem 1rem; display:flex; align-items:center; justify-content:space-between;
-    }
-    .stat-label{ color:var(--muted); font-size:.92rem; }
-    .stat-right{ display:flex; align-items:baseline; gap:.5rem; }
-    .stat-value{ font-weight:700; font-size:1.15rem; }
-    .stat-sub{ color:var(--muted); font-size:.85rem; }
-    .stat.ok .stat-value{ color:#059669; }
-    .stat.warn .stat-value{ color:#b45309; }
-    .stat.danger .stat-value{ color:#b91c1c; }
-    @media (max-width: 720px){ .stats{ grid-template-columns: 1fr; } }
-
-    /* tabuľka so scrollom */
-    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border-radius:10px;width:100%}
-    table{border-collapse:collapse;width:100%;margin-top:.6rem}
-    table.wide-table{min-width:1100px} /* zaručí horizontálny posun */
-    th,td{border-top:1px solid #eee;padding:.9rem .7rem;text-align:left;background:#fff;vertical-align:middle}
-    th{font-size:.9rem;color:#374151;background:#fafafa}
-    .right{text-align:right}
     .muted{color:#6b7280}
     .pill{display:inline-block;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:999px;padding:.15rem .55rem;font-size:.78rem}
     .danger{color:#b91c1c}.ok{color:#059669}
+
+    /* --- ŠTATISTICKÉ KARTY --- */
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin-top:.8rem}
+    .stat{background:#fff;border:1px solid #eee;border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between}
+    .stat-label{color:var(--muted);font-size:.92rem}
+    .stat-right{display:flex;align-items:baseline;gap:.5rem}
+    .stat-value{font-weight:700;font-size:1.15rem}
+    .stat-sub{color:var(--muted);font-size:.85rem}
+    .stat.ok .stat-value{color:#059669}
+    .stat.warn .stat-value{color:#b45309}
+    .stat.danger .stat-value{color:#b91c1c}
+    @media (max-width:720px){ .stats{grid-template-columns:1fr} }
+
+    /* --- TABUĽKA so scrollom --- */
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border-radius:10px;width:100%}
+    table{border-collapse:collapse;width:100%;margin-top:.6rem}
+    table.wide-table{min-width:1100px}
+    th,td{border-top:1px solid #eee;padding:.9rem .7rem;text-align:left;background:#fff;vertical-align:middle}
+    th{font-size:.9rem;color:#374151;background:#fafafa}
+    .right{text-align:right}
 
     @media (max-width:480px){
       table.wide-table{min-width:1200px}
       th,td{padding:1rem .6rem}
     }
+
     @media print{
       .months,.toolbar,header{display:none}
       body{background:#fff}
       .card{border:none;box-shadow:none;padding:0}
     }
-    /* === 🌙 DARK MODE – moderný kontrastný štýl so šedými riadkami === */
-@media (prefers-color-scheme: dark) {
-  :root{
-    --bg: #111418;
-    --card: #1b1f24;
-    --muted: #9ca3af;
-    --red: #ef4444;
-    --ring: 0 0 0 3px rgba(239,68,68,.25);
-  }
 
-  body{ color:#e5e7eb; background:var(--bg); }
-  h1,h2{ color:#f3f4f6; }
-  header .logo{ background:var(--red); color:#fff; }
+    /* === 🌙 DARK MODE – šedé inputy aj pri písaní + tmavý scrollbar === */
+    @media (prefers-color-scheme: dark) {
+      :root{ --bg:#111418; --card:#1b1f24; --muted:#9ca3af; --red:#ef4444; --ring:0 0 0 3px rgba(239,68,68,.25); }
+      body{ color:#e5e7eb; background:var(--bg); }
+      h1,h2{ color:#f3f4f6; }
+      header .logo{ background:var(--red); color:#fff; }
+      .card{ border-color:#2a2f35; background:var(--card); box-shadow:none; }
+      .m-btn{ background:#1f242a; color:#e5e7eb; border-color:#374151; }
+      .m-btn.active{ background:var(--red); color:#fff; border-color:var(--red); }
+      .btn{ background:#2a3036; border-color:#374151; color:#f3f4f6; }
+      .btn.red{ background:var(--red); border-color:var(--red); color:#fff; }
+      .pill{ background:#2f3540; border-color:#374151; color:#f3f4f6; }
+      table{ background:var(--card); color:#f3f4f6; border-radius:12px; overflow:hidden; }
+      th{ background:#242930; color:#d1d5db; }
+      td{ border-top-color:#2a2f35; }
 
-  .card{ border-color:#2a2f35; background:var(--card); box-shadow:none; }
-  .m-btn{ background:#1f242a; color:#e5e7eb; border-color:#374151; }
-  .m-btn.active{ background:var(--red); color:#fff; border-color:var(--red); }
-  .btn{ background:#2a3036; border-color:#374151; color:#f3f4f6; }
-  .btn.red{ background:var(--red); border-color:var(--red); color:#fff; }
-  .pill{ background:#2f3540; border-color:#374151; color:#f3f4f6; }
+      /* INPUTY – tmavošedé stále, aj pri focus */
+      input[type="text"], input[type="number"]{
+        background:#2a2f35;
+        border:1px solid #3b414a;
+        color:#f3f4f6;
+        border-radius:8px;
+        transition:border-color .2s, box-shadow .2s, background .2s;
+      }
+      input[type="text"]:focus, input[type="number"]:focus{
+        background:#2a2f35;               /* žiadne biele blikanie */
+        border-color:var(--red);
+        box-shadow:0 0 0 2px rgba(239,68,68,.35);
+        outline:none;
+        color:#f9fafb;
+      }
+      input::placeholder{ color:#6b7280; }
 
-  table{ background:var(--card); color:#f3f4f6; border-radius:12px; overflow:hidden; }
-  th{ background:#242930; color:#d1d5db; }
-  td{ border-top-color:#2a2f35; }
+      .stat{ border-color:#2f3540; background:#1e2329; }
+      .stat-label{ color:#9ca3af; }
+      .stat-value{ color:#f9fafb; }
+      .stat-sub{ color:#9ca3af; }
 
-  /* 🔸 INPUT POLIA – šedé, kontrastné, menej čierne */
-  input[type="text"], input[type="number"]{
-    background:#2a2f35;      /* 🔹 šedé pole namiesto čierneho */
-    border:1px solid #3b414a;
-    color:#f3f4f6;
-    border-radius:8px;
-    transition:border-color 0.2s, box-shadow 0.2s;
-  }
-  input[type="text"]:focus, input[type="number"]:focus{
-    border-color:var(--red);
-    box-shadow:0 0 0 2px rgba(239,68,68,.3);
-    outline:none;
-  }
-  input::placeholder{ color:#6b7280; }
-
-  .stat{ border-color:#2f3540; background:#1e2329; }
-  .stat-label{ color:#9ca3af; }
-  .stat-value{ color:#f9fafb; }
-  .stat-sub{ color:#9ca3af; }
-}
+      /* Scrollbar v dark štýle */
+      ::-webkit-scrollbar{ height:6px; width:6px; }
+      ::-webkit-scrollbar-thumb{ background:#3b414a; border-radius:6px; }
+      ::-webkit-scrollbar-thumb:hover{ background:#4b515b; }
+      ::-webkit-scrollbar-track{ background:#1b1f24; }
+    }
   </style>
 </head>
 <body>
@@ -165,15 +165,11 @@
       <div class="stats">
         <div class="stat" id="cardFix">
           <div class="stat-label">Fixné</div>
-          <div class="stat-right">
-            <div class="stat-value" id="sFix">0 €</div>
-          </div>
+          <div class="stat-right"><div class="stat-value" id="sFix">0 €</div></div>
         </div>
         <div class="stat" id="cardMissC">
           <div class="stat-label">Chýba do nákladov</div>
-          <div class="stat-right">
-            <div class="stat-value" id="sMissCosts">0 €</div>
-          </div>
+          <div class="stat-right"><div class="stat-value" id="sMissCosts">0 €</div></div>
         </div>
         <div class="stat" id="cardMissAll">
           <div class="stat-label">Chýba spolu (náklady + cieľ)</div>
